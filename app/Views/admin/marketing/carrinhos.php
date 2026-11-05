@@ -7,11 +7,11 @@ require dirname(__DIR__) . '/_titulo.php';
 $taxa = $stats['lembrados'] ? round($stats['convertidos'] / $stats['lembrados'] * 100) : 0;
 ?>
 <dl class="grid grid-cols-2 xl:grid-cols-5 gap-3">
-    <div class="cartao p-4"><dt class="text-sm text-suave">Valor em carrinhos parados</dt><dd class="preco text-2xl"><?= kz($valorEmAberto) ?></dd><dd class="text-xs text-suave">Últimos 30 dias</dd></div>
-    <div class="cartao p-4"><dt class="text-sm text-suave">Carrinhos lembrados</dt><dd class="font-display text-2xl font-extrabold num"><?= (int) $stats['lembrados'] ?></dd></div>
-    <div class="cartao p-4"><dt class="text-sm text-suave">Voltaram pelo email</dt><dd class="font-display text-2xl font-extrabold num"><?= (int) $stats['clicados'] ?></dd></div>
-    <div class="cartao p-4"><dt class="text-sm text-suave">Compraram</dt><dd class="font-display text-2xl font-extrabold num"><?= (int) $stats['convertidos'] ?> <span class="text-base text-suave"><?= $taxa ?>%</span></dd></div>
-    <div class="cartao p-4"><dt class="text-sm text-suave">Receita recuperada</dt><dd class="preco text-2xl text-sucesso"><?= kz($stats['receita']) ?></dd><dd class="text-xs text-suave num"><?= plural($stats['n'], 'pedido pago', 'pedidos pagos') ?></dd></div>
+    <div class="cartao kpi p-4"><dt class="text-sm text-suave">Valor em carrinhos parados</dt><dd class="preco kpi-valor"><?= kz($valorEmAberto) ?></dd><dd class="text-xs text-suave">Últimos 30 dias</dd></div>
+    <div class="cartao kpi p-4"><dt class="text-sm text-suave">Carrinhos lembrados</dt><dd class="font-display kpi-valor font-extrabold num"><?= (int) $stats['lembrados'] ?></dd></div>
+    <div class="cartao kpi p-4"><dt class="text-sm text-suave">Voltaram pelo email</dt><dd class="font-display kpi-valor font-extrabold num"><?= (int) $stats['clicados'] ?></dd></div>
+    <div class="cartao kpi p-4"><dt class="text-sm text-suave">Compraram</dt><dd class="font-display kpi-valor font-extrabold num"><?= (int) $stats['convertidos'] ?> <span class="text-base text-suave"><?= $taxa ?>%</span></dd></div>
+    <div class="cartao kpi p-4"><dt class="text-sm text-suave">Receita recuperada</dt><dd class="preco kpi-valor text-sucesso"><?= kz($stats['receita']) ?></dd><dd class="text-xs text-suave num"><?= plural($stats['n'], 'pedido pago', 'pedidos pagos') ?></dd></div>
 </dl>
 
 <div class="mt-6 cartao overflow-hidden"><div class="overflow-x-auto">

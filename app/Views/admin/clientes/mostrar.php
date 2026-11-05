@@ -4,9 +4,9 @@
 <div class="grid gap-6 xl:grid-cols-[1fr_340px]">
     <div class="space-y-6 min-w-0">
         <dl class="grid grid-cols-2 sm:grid-cols-3 gap-3">
-            <div class="cartao p-4"><dt class="text-sm text-suave">Pedidos</dt><dd class="font-display text-2xl font-extrabold num"><?= (int) $totais['pedidos'] ?></dd></div>
-            <div class="cartao p-4"><dt class="text-sm text-suave">Valor gasto</dt><dd class="preco text-2xl"><?= kz($totais['gasto']) ?></dd></div>
-            <div class="cartao p-4"><dt class="text-sm text-suave">Último acesso</dt><dd class="font-semibold num"><?= $c['ultimo_login_em'] ? date('d/m/Y H:i', strtotime($c['ultimo_login_em'])) : '—' ?></dd></div>
+            <div class="cartao kpi p-4"><dt class="text-sm text-suave">Pedidos</dt><dd class="font-display kpi-valor font-extrabold num"><?= (int) $totais['pedidos'] ?></dd></div>
+            <div class="cartao kpi p-4"><dt class="text-sm text-suave">Valor gasto</dt><dd class="preco kpi-valor"><?= kz($totais['gasto']) ?></dd></div>
+            <div class="cartao kpi p-4"><dt class="text-sm text-suave">Último acesso</dt><dd class="font-semibold num"><?= $c['ultimo_login_em'] ? date('d/m/Y H:i', strtotime($c['ultimo_login_em'])) : '—' ?></dd></div>
         </dl>
         <section class="cartao overflow-hidden">
             <h2 class="border-b border-linha px-5 py-4 font-display text-lg font-bold">Pedidos</h2>

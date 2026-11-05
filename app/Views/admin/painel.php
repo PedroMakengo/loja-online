@@ -41,26 +41,26 @@ $tarefas = array_filter([
 
 <!-- Números -->
 <dl class="grid grid-cols-2 xl:grid-cols-4 gap-3">
-    <div class="cartao p-4">
+    <div class="cartao kpi p-4">
         <dt class="text-sm text-suave">Vendas hoje</dt>
-        <dd class="mt-1 preco text-2xl"><?= kz($kpi['vendas_hoje']) ?></dd>
+        <dd class="mt-1 preco kpi-valor"><?= kz($kpi['vendas_hoje']) ?></dd>
         <dd class="text-xs text-suave num"><?= plural($kpi['pedidos_hoje'], 'pedido pago', 'pedidos pagos') ?></dd>
     </div>
-    <div class="cartao p-4">
+    <div class="cartao kpi p-4">
         <dt class="text-sm text-suave">Vendas este mês</dt>
-        <dd class="mt-1 preco text-2xl"><?= kz($kpi['vendas_mes']) ?></dd>
+        <dd class="mt-1 preco kpi-valor"><?= kz($kpi['vendas_mes']) ?></dd>
         <dd class="text-xs num <?= $variacao === null ? 'text-suave' : ($variacao >= 0 ? 'text-sucesso' : 'text-coral') ?>">
             <?= $variacao === null ? 'Sem vendas no mesmo período do mês anterior' : ($variacao >= 0 ? '+' : '') . $variacao . '% face ao mesmo período do mês anterior' ?>
         </dd>
     </div>
-    <div class="cartao p-4">
+    <div class="cartao kpi p-4">
         <dt class="text-sm text-suave">Valor médio por pedido</dt>
-        <dd class="mt-1 preco text-2xl"><?= kz($kpi['pedidos_mes'] ? $kpi['vendas_mes'] / $kpi['pedidos_mes'] : 0) ?></dd>
+        <dd class="mt-1 preco kpi-valor"><?= kz($kpi['pedidos_mes'] ? $kpi['vendas_mes'] / $kpi['pedidos_mes'] : 0) ?></dd>
         <dd class="text-xs text-suave num"><?= plural($kpi['pedidos_mes'], 'pedido', 'pedidos') ?> este mês</dd>
     </div>
-    <div class="cartao p-4">
+    <div class="cartao kpi p-4">
         <dt class="text-sm text-suave">Aguardam pagamento</dt>
-        <dd class="mt-1 font-display text-2xl font-extrabold num"><?= (int) $accoes['aguardam_pagamento'] ?></dd>
+        <dd class="mt-1 font-display kpi-valor font-extrabold num"><?= (int) $accoes['aguardam_pagamento'] ?></dd>
         <dd class="text-xs text-suave num"><?= plural($accoes['clientes_novos'], 'cliente novo', 'clientes novos') ?> em 30 dias</dd>
     </div>
 </dl>

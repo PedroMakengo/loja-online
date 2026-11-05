@@ -39,7 +39,7 @@ $saudacao = $hora < 12 ? 'Bom dia' : ($hora < 19 ? 'Boa tarde' : 'Boa noite');
                     <?php if ($pedidos): ?>
                     <ul class="divide-y divide-linha">
                         <?php foreach ($pedidos as $pd): $estadoPedido = $pd['estado']; ?>
-                        <li class="relative flex items-center justify-between gap-3 p-4 sm:px-5 hover:bg-elevado/50">
+                        <li class="relative flex items-center justify-between gap-3 p-4 sm:px-5 hover:bg-elevado/50 cursor-pointer" data-card="<?= url('/conta/pedidos/' . $pd['numero']) ?>">
                             <div class="min-w-0">
                                 <a href="<?= url('/conta/pedidos/' . $pd['numero']) ?>" class="font-semibold num hover:text-marca after:absolute after:inset-0"><?= e($pd['numero']) ?></a>
                                 <p class="truncate text-sm text-suave"><?= e($pd['primeiro_artigo'] ?? '') ?><?= $pd['artigos'] > 1 ? ' e mais ' . ($pd['artigos'] - 1) : '' ?></p>

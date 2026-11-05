@@ -20,8 +20,8 @@ $temas = [
                 $desc  = $temProduto ? descontoPercent($b['produto_preco_anterior'] ? (float) $b['produto_preco_anterior'] : null, (float) $b['produto_preco']) : null;
                 $carga = $i === 0 ? 'fetchpriority="high"' : 'loading="lazy"';
             ?>
-            <div class="relative w-full shrink-0 snap-start overflow-hidden text-white <?= $foto ? 'bg-grafite' : $fundo ?>"
-                 role="group" aria-roledescription="destaque" aria-label="<?= $i + 1 ?> de <?= count($banners) ?>">
+            <div class="relative w-full shrink-0 snap-start overflow-hidden text-white <?= $foto ? 'bg-grafite' : $fundo ?> <?= $b['link'] ? 'cursor-pointer' : '' ?>"
+                 <?= $b['link'] ? 'data-card="' . e(url($b['link'])) . '"' : '' ?> role="group" aria-roledescription="destaque" aria-label="<?= $i + 1 ?> de <?= count($banners) ?>">
 
                 <?php if ($foto): ?>
                 <!-- Fotografia real a ocupar o banner; véu escuro do lado do texto para garantir leitura -->

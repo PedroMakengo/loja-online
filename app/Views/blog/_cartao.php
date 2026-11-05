@@ -1,5 +1,5 @@
 <?php /** Cartão de artigo. Espera $post */ ?>
-<article class="group relative flex flex-col cartao overflow-hidden hover:border-tinta/25 transition-colors">
+<article class="group relative flex flex-col cartao overflow-hidden hover:border-tinta/25 transition-colors cursor-pointer" data-card="<?= url('/blog/' . $post['slug']) ?>">
     <div class="aspect-[16/9] overflow-hidden"><?php $grande = false; require __DIR__ . '/_capa.php'; ?></div>
     <div class="flex flex-1 flex-col p-5">
         <p class="text-xs font-semibold text-marca"><?= e($post['categoria_nome']) ?></p>

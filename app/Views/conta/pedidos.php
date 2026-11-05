@@ -7,7 +7,7 @@
             <?php if ($pedidos): ?>
             <ul class="cartao divide-y divide-linha">
                 <?php foreach ($pedidos as $pd): $estadoPedido = $pd['estado']; ?>
-                <li class="relative grid grid-cols-[1fr_auto] hover:bg-elevado/50 gap-x-4 gap-y-1 p-4 sm:px-5">
+                <li class="relative grid grid-cols-[1fr_auto] hover:bg-elevado/50 gap-x-4 gap-y-1 p-4 sm:px-5 cursor-pointer" data-card="<?= url('/conta/pedidos/' . $pd['numero']) ?>">
                     <a href="<?= url('/conta/pedidos/' . $pd['numero']) ?>" class="font-semibold num hover:text-marca after:absolute after:inset-0">
                         <?= e($pd['numero']) ?></a>
                     <p class="preco text-base text-right"><?= kz($pd['total']) ?></p>

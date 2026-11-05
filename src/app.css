@@ -88,6 +88,11 @@
 
   /* Preço — números tabulares, Bricolage, "Kz" mais pequeno */
   .preco { @apply font-display font-extrabold tracking-tight text-tinta; font-variant-numeric: tabular-nums; }
+
+  /* Cartões de números (painel/relatórios): o valor encolhe com a largura do próprio cartão,
+     para "1.499.800,00 Kz" nunca sair do cartão em grelhas de 4–5 colunas. */
+  .kpi { container-type: inline-size; min-width: 0; }
+  .kpi-valor { font-size: 1.25rem; font-size: clamp(1rem, 8cqi, 1.5rem); line-height: 1.2; white-space: nowrap; }
   .preco-anterior { @apply text-sm text-suave line-through; font-variant-numeric: tabular-nums; }
 
   /* ===== Etiqueta de preço — o elemento-assinatura da loja =====

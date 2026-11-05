@@ -7,10 +7,12 @@ $link     = url('/produto/' . $p['slug']);
 $favorito = in_array((int) $p['id'], favoritosIds(), true);
 $comparar = in_array((int) $p['id'], \App\Servicos\Comparador::ids(), true);
 ?>
-<article class="group relative flex flex-col cartao p-2.5 sm:p-3 hover:border-tinta/25 transition-colors">
+<article class="group relative flex flex-col cartao p-2.5 sm:p-3 hover:border-tinta/25 transition-colors cursor-pointer" data-card="<?= $link ?>">
     <div class="relative aspect-square overflow-hidden rounded-xl bg-white">
-        <img src="<?= imagemProduto($p) ?>" alt="<?= e($p['nome']) ?>" loading="lazy" decoding="async" width="400" height="400"
-             class="h-full w-full object-contain p-4 transition-transform duration-300 group-hover:scale-[1.04] <?= $esgotado ? 'opacity-50' : '' ?>">
+        <a href="<?= $link ?>" tabindex="-1" aria-hidden="true" class="block h-full w-full">
+            <img src="<?= imagemProduto($p) ?>" alt="<?= e($p['nome']) ?>" loading="lazy" decoding="async" width="400" height="400"
+                 class="h-full w-full object-contain p-4 transition-transform duration-300 group-hover:scale-[1.04] <?= $esgotado ? 'opacity-50' : '' ?>">
+        </a>
         <div class="absolute left-2 top-2 flex flex-col items-start gap-1">
             <?php if ($desc): ?><span class="etiqueta num">-<?= $desc ?>%</span><?php endif; ?>
             <?php if ((int) $p['novidade']): ?><span class="selo-novo">Novo</span><?php endif; ?>

@@ -1,7 +1,7 @@
 <?php /** Cartão de produto dentro do artigo ([produto:slug]). Preço e stock actuais. Espera $p */
 $desc = descontoPercent($p['preco_anterior'] ? (float) $p['preco_anterior'] : null, (float) $p['preco']); $esgotado = (int) $p['stock'] < 1; ?>
-<aside class="my-6 flex items-center gap-4 rounded-2xl border border-linha bg-superficie p-3 sm:p-4" aria-label="<?= e($p['nome']) ?>">
-    <a href="<?= url('/produto/' . $p['slug']) ?>" class="shrink-0"><img src="<?= imagemProduto($p) ?>" alt="" class="h-20 w-20 sm:h-24 sm:w-24 rounded-xl bg-white object-contain p-2" width="96" height="96" loading="lazy"></a>
+<aside class="my-6 flex items-center gap-4 rounded-2xl border border-linha bg-superficie p-3 sm:p-4 cursor-pointer hover:border-tinta/25 transition-colors" aria-label="<?= e($p['nome']) ?>" data-card="<?= url('/produto/' . $p['slug']) ?>">
+    <a href="<?= url('/produto/' . $p['slug']) ?>" class="shrink-0" tabindex="-1" aria-hidden="true"><img src="<?= imagemProduto($p) ?>" alt="" class="h-20 w-20 sm:h-24 sm:w-24 rounded-xl bg-white object-contain p-2" width="96" height="96" loading="lazy"></a>
     <div class="min-w-0 flex-1">
         <p class="text-xs text-suave"><?= e($p['marca_nome'] ?? '') ?></p>
         <a href="<?= url('/produto/' . $p['slug']) ?>" class="font-semibold leading-snug hover:text-marca line-clamp-2"><?= e($p['nome']) ?></a>

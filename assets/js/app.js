@@ -53,6 +53,21 @@
   }
 
   // ------------------------------------------------------------------
+  // Cartões inteiramente clicáveis: [data-card="URL"]
+  // Funciona em qualquer zona do cartão (imagem, preço, espaços vazios);
+  // botões e links internos (carrinho, favoritos, comparar) continuam a
+  // fazer a sua acção. Ctrl/Cmd+clique abre noutro separador.
+  // ------------------------------------------------------------------
+  document.addEventListener('click', (e) => {
+    const card = e.target.closest('[data-card]');
+    if (!card || e.defaultPrevented || e.button !== 0) return;
+    if (e.target.closest('a, button, input, select, textarea, label, summary, [role="button"]')) return;
+    if (String(window.getSelection?.() || '').trim()) return; // o utilizador estava a seleccionar texto
+    if (e.ctrlKey || e.metaKey || e.shiftKey) window.open(card.dataset.card, '_blank', 'noopener');
+    else location.href = card.dataset.card;
+  });
+
+  // ------------------------------------------------------------------
   // Tema claro / escuro
   // ------------------------------------------------------------------
   document.addEventListener('click', (e) => {
@@ -278,6 +293,12 @@
     if (typeof d.quantidade === 'number') actualizarContador(d.quantidade);
     const conteudo = $('[data-carrinho-conteudo]');
     if (conteudo && d.html) conteudo.innerHTML = d.html;
+    // Painel "Adicionado ao carrinho": actualiza ou fecha se o produto saiu do carrinho
+    if ('adicionado' in d) {
+      const painel = $('[data-adicionado-conteudo]');
+      if (painel && d.adicionado) painel.innerHTML = d.adicionado;
+      else if (!d.adicionado) fecharGaveta($('#adicionado[data-aberta]'));
+    }
     if (location.pathname === url('/carrinho')) recarregarRegioes(location.href, false);
   }
 
@@ -299,22 +320,25 @@
       if (!d.ok) { toast(d.mensagem, 'erro'); return; }
       aplicarRespostaCarrinho(d);
       if (add.hasAttribute('data-comprar-ja')) { location.href = url('/checkout'); return; }
+      // Sugere o passo seguinte: aumentar a quantidade, ver o carrinho ou pagar
+      if (d.adicionado && $('#adicionado')) { abrirGaveta('adicionado'); return; }
       toast(d.mensagem, 'ok', { texto: 'Ver carrinho', href: url('/carrinho'), aoClicar: (ev) => { ev.preventDefault(); abrirGaveta('carrinho'); } });
       return;
     }
 
-    // Alterar quantidade (gaveta e página do carrinho)
+    // Alterar quantidade (gaveta, página do carrinho e painel "Adicionado")
     const passo = e.target.closest('[data-qtd]');
     if (passo) {
       const caixa = passo.closest('[data-quantidade]');
       const valor = $('[data-qtd-valor]', caixa);
       const nova = +valor.textContent + +passo.dataset.qtd;
+      const extra = caixa.closest('#adicionado') ? { painel: 1 } : {};
       if (nova < 1) {
-        aplicarRespostaCarrinho(await pedido(url('/carrinho/remover'), { produto_id: caixa.dataset.quantidade }));
+        aplicarRespostaCarrinho(await pedido(url('/carrinho/remover'), { produto_id: caixa.dataset.quantidade, ...extra }));
         return;
       }
       valor.textContent = nova;
-      aplicarRespostaCarrinho(await pedido(url('/carrinho/actualizar'), { produto_id: caixa.dataset.quantidade, quantidade: nova }));
+      aplicarRespostaCarrinho(await pedido(url('/carrinho/actualizar'), { produto_id: caixa.dataset.quantidade, quantidade: nova, ...extra }));
       return;
     }
 

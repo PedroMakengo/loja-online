@@ -13,7 +13,7 @@
     </nav>
 
     <?php if ($destaque): $post = $destaque; ?>
-    <article class="group relative mb-8 grid overflow-hidden cartao md:grid-cols-2 hover:border-tinta/25 transition-colors">
+    <article class="group relative mb-8 grid overflow-hidden cartao md:grid-cols-2 hover:border-tinta/25 transition-colors cursor-pointer" data-card="<?= url('/blog/' . $post['slug']) ?>">
         <div class="aspect-[16/9] md:aspect-auto md:min-h-[320px]"><?php $grande = true; require __DIR__ . '/_capa.php'; ?></div>
         <div class="flex flex-col justify-center p-6 sm:p-8">
             <p class="text-sm font-semibold text-marca"><?= e($post['categoria_nome']) ?></p>

@@ -69,6 +69,7 @@ $mensagensFlash = Flash::ler();
     <?php require RAIZ . '/app/Views/partials/footer.php'; ?>
     <?php require RAIZ . '/app/Views/partials/nav-mobile.php'; ?>
     <?php require RAIZ . '/app/Views/partials/carrinho-gaveta.php'; ?>
+    <?php require RAIZ . '/app/Views/partials/carrinho-adicionado-painel.php'; ?>
 
     <!-- Barra de comparação -->
     <?php $totalComparar = count(\App\Servicos\Comparador::ids()); ?>

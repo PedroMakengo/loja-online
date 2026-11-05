@@ -33,12 +33,12 @@ $barra = function (array $linhas, string $rotulo, callable $nome) {
 </form>
 
 <dl class="grid grid-cols-2 xl:grid-cols-5 gap-3">
-    <div class="cartao p-4"><dt class="text-sm text-suave">Receita (pedidos pagos)</dt><dd class="preco text-2xl"><?= kz($totais['receita']) ?></dd></div>
-    <div class="cartao p-4"><dt class="text-sm text-suave">Pedidos</dt><dd class="font-display text-2xl font-extrabold num"><?= (int) $totais['pedidos'] ?></dd></div>
-    <div class="cartao p-4"><dt class="text-sm text-suave">Valor médio</dt><dd class="preco text-2xl"><?= kz($totais['ticket']) ?></dd></div>
-    <div class="cartao p-4"><dt class="text-sm text-suave">IVA incluído</dt><dd class="preco text-2xl"><?= kz($totais['iva']) ?></dd><dd class="text-xs text-suave">Descontos: <?= kz($totais['descontos']) ?></dd></div>
-    <div class="cartao p-4"><dt class="text-sm text-suave">Margem bruta estimada</dt>
-        <dd class="preco text-2xl"><?= $margem !== null ? kz($margem) : '—' ?></dd>
+    <div class="cartao kpi p-4"><dt class="text-sm text-suave">Receita (pedidos pagos)</dt><dd class="preco kpi-valor"><?= kz($totais['receita']) ?></dd></div>
+    <div class="cartao kpi p-4"><dt class="text-sm text-suave">Pedidos</dt><dd class="font-display kpi-valor font-extrabold num"><?= (int) $totais['pedidos'] ?></dd></div>
+    <div class="cartao kpi p-4"><dt class="text-sm text-suave">Valor médio</dt><dd class="preco kpi-valor"><?= kz($totais['ticket']) ?></dd></div>
+    <div class="cartao kpi p-4"><dt class="text-sm text-suave">IVA incluído</dt><dd class="preco kpi-valor"><?= kz($totais['iva']) ?></dd><dd class="text-xs text-suave">Descontos: <?= kz($totais['descontos']) ?></dd></div>
+    <div class="cartao kpi p-4"><dt class="text-sm text-suave">Margem bruta estimada</dt>
+        <dd class="preco kpi-valor"><?= $margem !== null ? kz($margem) : '—' ?></dd>
         <dd class="text-xs text-suave"><?= $totais['sem_custo'] > 0 ? kz($totais['sem_custo']) . ' vendidos sem custo registado' : 'Receita sem portes, menos custo dos produtos' ?></dd></div>
 </dl>
 
