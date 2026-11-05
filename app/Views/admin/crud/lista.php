@@ -8,7 +8,7 @@ $mostrar = function (string $campo, array $f, $valor) use ($opcoesTabela) {
     if ($valor === null || $valor === '') return '<span class="text-suave">—</span>';
     return match ($f['tipo']) {
         'booleano' => $valor ? '<span class="text-sucesso font-semibold">Sim</span>' : '<span class="text-suave">Não</span>',
-        'dinheiro' => '<span class="num">' . number_format((float) $valor, (float) $valor == (int) $valor ? 0 : 2, ',', ' ') . '</span>',
+        'dinheiro' => '<span class="num">' . kz($valor) . '</span>',
         'datahora', 'data' => '<span class="num">' . date($f['tipo'] === 'data' ? 'd/m/Y' : 'd/m/Y H:i', strtotime($valor)) . '</span>',
         'select' => e((string) ($f['opcoes'][$valor] ?? $opcoesTabela[$campo][$valor] ?? $valor)),
         'numero' => '<span class="num">' . e((string) $valor) . '</span>',

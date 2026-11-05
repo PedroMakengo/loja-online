@@ -7,7 +7,8 @@
   const $ = (s, el = document) => el.querySelector(s);
   const $$ = (s, el = document) => [...el.querySelectorAll(s)];
   const CSRF = document.querySelector('meta[name="csrf-token"]')?.content || '';
-  const kz = (n) => new Intl.NumberFormat('pt-AO', { maximumFractionDigits: 0 }).format(n).replace(/\s/g, '\u202F') + '\u00A0Kz';
+  // 349.900,00 Kz \u2014 'de-DE' garante ponto nos milhares e v\u00EDrgula nas d\u00E9cimas
+  const kz = (n) => new Intl.NumberFormat('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(n) + '\u00A0Kz';
   const aviso = (msg, erro = false) => {
     const caixa = $('#toasts'); if (!caixa) return;
     const el = document.createElement('div');

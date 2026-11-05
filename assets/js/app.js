@@ -350,7 +350,7 @@
     const prazoEl = $('[data-entrega-prazo]');
     if (!zona) { precoEl.textContent = '—'; prazoEl.textContent = ''; return; }
     const ehGratis = zona.provincia === 'Luanda' && subtotal >= gratis;
-    precoEl.textContent = ehGratis ? 'Grátis' : new Intl.NumberFormat('pt-AO', { maximumFractionDigits: 0 }).format(+zona.preco).replace(/\s/g, '\u202F') + '\u00A0Kz';
+    precoEl.textContent = ehGratis ? 'Grátis' : new Intl.NumberFormat('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(+zona.preco) + '\u00A0Kz';
     precoEl.classList.toggle('text-sucesso', ehGratis);
     prazoEl.textContent = +zona.prazo_min === +zona.prazo_max ? `${zona.prazo_min} dia útil` : `${zona.prazo_min} a ${zona.prazo_max} dias úteis`;
   }

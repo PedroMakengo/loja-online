@@ -24,7 +24,8 @@ function asset(string $caminho): string
 /** Preço em Kwanzas: 389900 -> "389 900 Kz" */
 function kz(float|int|string|null $valor): string
 {
-    return number_format((float) $valor, 0, ',', "\u{202F}") . "\u{00A0}" . MOEDA;
+    // Formato angolano: 349.900,00 Kz
+    return number_format((float) $valor, 2, ',', '.') . "\u{00A0}" . MOEDA;
 }
 
 /** Percentagem de desconto entre preço anterior e actual. */
