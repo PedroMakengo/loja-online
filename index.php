@@ -32,6 +32,7 @@ use App\Controllers\Admin\ProdutosController as AdminProdutos;
 use App\Controllers\Admin\ClientesController as AdminClientes;
 use App\Controllers\Admin\CrudController;
 use App\Controllers\Admin\RelatoriosController;
+use App\Controllers\Admin\AnaliseController;
 use App\Controllers\Admin\MensagensController;
 use App\Controllers\Admin\AdminsController;
 use App\Controllers\Admin\AvaliacoesController as AdminAvaliacoes;
@@ -186,6 +187,7 @@ $router->get('/admin/clientes/{id}', [AdminClientes::class, 'mostrar']);
 $router->post('/admin/clientes/{id}/estado', [AdminClientes::class, 'alternarEstado']);
 
 $router->get('/admin/relatorios', [RelatoriosController::class, 'index']);
+$router->get('/admin/analise', [AnaliseController::class, 'index']);
 $router->get('/admin/relatorios/csv', [RelatoriosController::class, 'csv']);
 $router->get('/admin/mensagens', [MensagensController::class, 'index']);
 $router->post('/admin/mensagens/{id}/lida', [MensagensController::class, 'lida']);

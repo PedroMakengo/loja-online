@@ -9,7 +9,7 @@ class RelatoriosController extends Base
 {
     protected ?string $area = 'relatorios';
 
-    private function periodo(): array
+    protected function periodo(): array
     {
         $de  = $_GET['de']  ?? date('Y-m-01');
         $ate = $_GET['ate'] ?? date('Y-m-d');

@@ -172,3 +172,84 @@
   body:has([data-barra-compra]) .botao-whatsapp { bottom: 9.5rem; }
   body:has([data-barra-compra]) .barra-comparar { bottom: 9.5rem; }
 }
+
+/* =====================================================================
+   Gráficos (assets/js/graficos.js) — estilo shadcn/ui charts
+   Paleta categórica validada (dataviz validate_palette.js) contra a
+   superfície clara #ffffff e escura #141a2e. No claro, aqua/amarelo/
+   magenta ficam abaixo de 3:1 → cada gráfico tem "Ver tabela".
+   ===================================================================== */
+:root {
+  --serie-1: #2a78d6; --serie-2: #eb6834; --serie-3: #1baf7a;
+  --serie-4: #eda100; --serie-5: #e87ba4; --serie-6: #6250d6;
+  --anterior: #a3a9b8;          /* período anterior: cinza de contexto */
+  --grafico-outros: #8b93a7;
+  --grafico-perda: rgb(var(--coral));
+  /* Rampa sequencial (um só tom, claro → escuro); seq-0 = sem dados */
+  --seq-0: rgb(var(--elevado)); --seq-1: #b7d3f6; --seq-2: #86b6ef;
+  --seq-3: #5598e7; --seq-4: #2a78d6; --seq-5: #1c5cab;
+}
+.dark {
+  --serie-1: #3987e5; --serie-2: #d95926; --serie-3: #199e70;
+  --serie-4: #c98500; --serie-5: #d55181; --serie-6: #9085e9;
+  --anterior: #5d6680;
+  --grafico-outros: #6b7493;
+  --seq-1: #1d3357; --seq-2: #184f95; --seq-3: #256abf;
+  --seq-4: #3987e5; --seq-5: #86b6ef;
+}
+
+[data-grafico] { position: relative; min-width: 0; }
+.grafico-svg { display: block; overflow: visible; }
+.grafico-grelha { stroke: rgb(var(--linha)); stroke-width: 1; shape-rendering: crispEdges; }
+.grafico-eixo { fill: rgb(var(--suave)); font-size: 11px; font-variant-numeric: tabular-nums; }
+.grafico-guia { stroke: rgb(var(--suave) / .5); stroke-width: 1; }
+.grafico-ponto { stroke: rgb(var(--superficie)); stroke-width: 2; }
+.grafico-realce { fill: rgb(var(--elevado) / .7); }
+.grafico-fatia { stroke: rgb(var(--superficie)); stroke-width: 2; stroke-linejoin: round; transition: d .15s; cursor: pointer; }
+.grafico-celula { transition: opacity .15s; }
+.grafico-celula:hover { stroke: rgb(var(--tinta)); stroke-width: 1.5; }
+.grafico-centro-valor { fill: rgb(var(--tinta)); font-family: theme('fontFamily.display'); font-size: 22px; font-weight: 800; }
+.grafico-centro-rotulo { fill: rgb(var(--suave)); font-size: 12px; }
+.grafico-vazio { display: flex; align-items: center; justify-content: center; border-radius: .75rem; border: 1px dashed rgb(var(--linha)); color: rgb(var(--suave)); font-size: .875rem; }
+
+.grafico-tooltip {
+  position: absolute; z-index: 20; pointer-events: none; min-width: 9rem; max-width: 18rem;
+  border-radius: .5rem; border: 1px solid rgb(var(--linha)); background: rgb(var(--superficie));
+  padding: .375rem .625rem; font-size: .75rem; box-shadow: 0 12px 32px -8px rgb(0 0 0 / .18);
+}
+.grafico-tooltip-titulo { margin-bottom: .25rem; font-weight: 600; color: rgb(var(--tinta)); }
+.grafico-tooltip-linha { display: flex; align-items: center; gap: .5rem; line-height: 1.6; }
+.grafico-tooltip-nome { color: rgb(var(--suave)); }
+.grafico-tooltip-valor { margin-left: auto; padding-left: .75rem; font-weight: 600; color: rgb(var(--tinta)); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.grafico-indicador { display: inline-block; height: .625rem; width: .625rem; flex-shrink: 0; border-radius: 2px; }
+
+.grafico-legenda { display: flex; flex-wrap: wrap; justify-content: center; gap: .25rem 1rem; font-size: .75rem; color: rgb(var(--suave)); }
+.grafico-legenda > span { display: inline-flex; align-items: center; gap: .375rem; }
+
+.grafico-donut { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 1.25rem; }
+.grafico-legenda-lista { display: grid; gap: .5rem; min-width: 10rem; flex: 1; font-size: .8125rem; }
+.grafico-legenda-lista li { display: flex; align-items: center; gap: .5rem; }
+.grafico-legenda-nome { color: rgb(var(--tinta)); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.grafico-legenda-pct { margin-left: auto; color: rgb(var(--suave)); font-variant-numeric: tabular-nums; }
+
+.grafico-ranking { display: grid; gap: .625rem; }
+.grafico-ranking-linha { display: grid; grid-template-columns: minmax(0, 9rem) minmax(0, 1fr) auto; align-items: center; gap: .75rem; font-size: .8125rem; border-radius: .5rem; }
+.grafico-ranking-linha:hover .grafico-ranking-pista { background: rgb(var(--elevado)); }
+.grafico-ranking-rotulo { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: rgb(var(--tinta)); }
+.grafico-ranking-pista { display: block; height: 1.25rem; border-radius: .375rem; background: rgb(var(--elevado) / .55); transition: background .15s; }
+.grafico-ranking-barra { display: block; height: 100%; border-radius: 0 4px 4px 0; }
+.grafico-ranking-valor { font-weight: 600; font-variant-numeric: tabular-nums; white-space: nowrap; color: rgb(var(--tinta)); }
+.grafico-ranking-pct { margin-left: .25rem; font-weight: 500; color: rgb(var(--suave)); }
+
+.grafico-escala { margin-top: .5rem; display: flex; align-items: center; justify-content: flex-end; gap: 3px; font-size: .6875rem; color: rgb(var(--suave)); }
+.grafico-escala span:first-child { margin-right: .25rem; } .grafico-escala span:last-child { margin-left: .25rem; }
+.grafico-escala-passo { height: .75rem; width: .75rem; border-radius: 2px; }
+
+.grafico-tabela { max-height: 20rem; overflow: auto; border-radius: .75rem; border: 1px solid rgb(var(--linha)); }
+.grafico-tabela table { width: 100%; font-size: .8125rem; }
+.grafico-tabela th { position: sticky; top: 0; background: rgb(var(--elevado)); padding: .5rem .75rem; font-weight: 600; font-size: .75rem; color: rgb(var(--suave)); white-space: nowrap; }
+.grafico-tabela td { padding: .4rem .75rem; border-top: 1px solid rgb(var(--linha)); white-space: nowrap; }
+
+@media (max-width: 639px) {
+  .grafico-ranking-linha { grid-template-columns: minmax(0, 6.5rem) minmax(0, 1fr) auto; }
+}

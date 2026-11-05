@@ -73,7 +73,7 @@ define('URL_BASE', URL_ORIGEM . BASE_PATH);
 define('RAIZ', dirname(__DIR__));
 
 // Versão dos assets — mudar após recompilar CSS/JS para limpar cache.
-define('VERSAO_ASSETS', '1.8.4');
+define('VERSAO_ASSETS', '1.9.1');
 
 // ---------------------------------------------------------------------
 // Sessão segura

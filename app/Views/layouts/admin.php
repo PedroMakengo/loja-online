@@ -22,6 +22,7 @@ $contadores = $adminSessao ? $db->query(
 $menuAdmin = [
     ['Geral', [
         ['/admin', 'casa', 'Resumo', 'painel', null],
+        ['/admin/analise', 'grafico', 'Análise de Dados', 'relatorios', null],
         ['/admin/relatorios', 'grelha', 'Relatórios', 'relatorios', null],
     ]],
     ['Vendas', [
