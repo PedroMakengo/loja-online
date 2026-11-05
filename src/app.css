@@ -1,0 +1,169 @@
+/* =====================================================================
+   DIOTEKNO — CSS fonte (Tailwind). Compila para assets/css/app.css
+   ===================================================================== */
+
+@font-face { font-family: 'Figtree'; font-weight: 400; font-display: swap; src: url('../fonts/figtree-latin-400-normal.woff2') format('woff2'); }
+@font-face { font-family: 'Figtree'; font-weight: 500; font-display: swap; src: url('../fonts/figtree-latin-500-normal.woff2') format('woff2'); }
+@font-face { font-family: 'Figtree'; font-weight: 600; font-display: swap; src: url('../fonts/figtree-latin-600-normal.woff2') format('woff2'); }
+@font-face { font-family: 'Figtree'; font-weight: 700; font-display: swap; src: url('../fonts/figtree-latin-700-normal.woff2') format('woff2'); }
+@font-face { font-family: 'Bricolage Grotesque'; font-weight: 600; font-display: swap; src: url('../fonts/bricolage-grotesque-latin-600-normal.woff2') format('woff2'); }
+@font-face { font-family: 'Bricolage Grotesque'; font-weight: 700; font-display: swap; src: url('../fonts/bricolage-grotesque-latin-700-normal.woff2') format('woff2'); }
+@font-face { font-family: 'Bricolage Grotesque'; font-weight: 800; font-display: swap; src: url('../fonts/bricolage-grotesque-latin-800-normal.woff2') format('woff2'); }
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ---------------------------------------------------------------------
+   Tokens de cor (RGB) — claro / escuro
+   --------------------------------------------------------------------- */
+@layer base {
+  :root {
+    --fundo: 243 245 250;        /* cinza frio da página */
+    --superficie: 255 255 255;   /* cartões */
+    --elevado: 236 239 246;      /* fundo das imagens de produto, chips */
+    --linha: 222 226 236;
+    --tinta: 20 26 46;           /* grafite — texto principal */
+    --suave: 93 102 128;
+    --marca: 35 70 245;          /* azul cobalto DIOTEKNO */
+    --marca-forte: 24 50 196;
+    --marca-suave: 228 234 255;
+    --coral: 232 63 52;          /* promoções / desconto */
+    --coral-suave: 253 232 230;
+    --sucesso: 14 138 78;
+    --aviso: 196 120 0;
+    color-scheme: light;
+  }
+  .dark {
+    --fundo: 12 16 31;
+    --superficie: 20 26 46;
+    --elevado: 29 36 62;
+    --linha: 41 50 82;
+    --tinta: 234 237 246;
+    --suave: 152 161 189;
+    --marca: 110 134 255;
+    --marca-forte: 140 160 255;
+    --marca-suave: 31 41 86;
+    --coral: 255 106 94;
+    --coral-suave: 64 28 34;
+    --sucesso: 52 199 120;
+    --aviso: 245 170 40;
+    color-scheme: dark;
+  }
+
+  html { -webkit-tap-highlight-color: transparent; scroll-padding-top: 8rem; }
+  body { @apply bg-fundo text-tinta font-sans antialiased; font-feature-settings: "tnum" 0; }
+  h1, h2, h3 { @apply font-display tracking-tight; text-wrap: balance; }
+  :focus-visible { @apply outline-none ring-2 ring-marca ring-offset-2 ring-offset-fundo; }
+  [x-cloak], [hidden] { display: none !important; }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; scroll-behavior: auto !important; }
+  }
+}
+
+/* ---------------------------------------------------------------------
+   Componentes
+   --------------------------------------------------------------------- */
+@layer components {
+  .btn { @apply inline-flex items-center justify-center gap-2 rounded-xl px-5 h-11 text-sm font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed; }
+  .btn-primario { @apply btn bg-marca text-white hover:bg-marca-forte; }
+  .dark .btn-primario { @apply text-grafite; }
+  .btn-secundario { @apply btn bg-superficie text-tinta border border-linha hover:border-tinta/40; }
+  .btn-fantasma { @apply btn text-tinta hover:bg-elevado; }
+  .btn-whatsapp { @apply btn bg-[#1FAF5A] text-white hover:bg-[#178F49]; }
+  .btn-icone { @apply inline-flex h-10 w-10 items-center justify-center rounded-xl text-tinta hover:bg-elevado transition-colors; }
+
+  .campo { @apply w-full h-11 rounded-xl border border-linha bg-superficie px-3.5 text-sm text-tinta placeholder:text-suave/80 focus:border-marca focus:ring-2 focus:ring-marca/25 focus:outline-none transition; }
+  textarea.campo { @apply h-auto py-3; }
+  .campo[aria-invalid="true"] { @apply border-coral focus:border-coral focus:ring-coral/25; }
+  .rotulo { @apply mb-1.5 block text-sm font-medium text-tinta; }
+
+  .cartao { @apply rounded-2xl bg-superficie border border-linha; }
+  .chip { @apply inline-flex items-center gap-1.5 rounded-full border border-linha bg-superficie px-3 h-9 text-sm font-medium text-tinta hover:border-tinta/40 transition-colors; }
+  .chip-activo { @apply border-tinta bg-tinta text-superficie hover:border-tinta; }
+
+  .titulo-seccao { @apply font-display text-xl sm:text-2xl font-bold text-tinta; }
+  .link { @apply text-marca font-semibold hover:underline underline-offset-4; }
+
+  /* Preço — números tabulares, Bricolage, "Kz" mais pequeno */
+  .preco { @apply font-display font-extrabold tracking-tight text-tinta; font-variant-numeric: tabular-nums; }
+  .preco-anterior { @apply text-sm text-suave line-through; font-variant-numeric: tabular-nums; }
+
+  /* ===== Etiqueta de preço — o elemento-assinatura da loja =====
+     Inspirada nas etiquetas de prateleira das lojas físicas:
+     corpo com furo à esquerda. Usada nas promoções e no banner. */
+  .etiqueta {
+    @apply relative inline-flex items-center gap-1 rounded-r-lg bg-coral pl-5 pr-2.5 py-1 font-display text-xs font-bold text-white;
+    clip-path: polygon(10px 0, 100% 0, 100% 100%, 10px 100%, 0 50%);
+  }
+  .etiqueta::before {
+    content: ''; @apply absolute left-[9px] top-1/2 h-1.5 w-1.5 -translate-y-1/2 rounded-full bg-superficie;
+  }
+  .etiqueta-grande {
+    @apply relative inline-flex flex-col items-start rounded-r-2xl bg-white pl-10 pr-6 py-4 text-grafite shadow-flutuante;
+    clip-path: polygon(26px 0, 100% 0, 100% 100%, 26px 100%, 0 50%);
+  }
+  .etiqueta-grande::before {
+    content: ''; @apply absolute left-[20px] top-1/2 h-3 w-3 -translate-y-1/2 rounded-full bg-grafite/15;
+  }
+
+  /* Estrelas para avaliar: rádios em ordem inversa para o ~ colorir as anteriores */
+  .estrelas-input { @apply inline-flex flex-row-reverse justify-end; }
+  .estrelas-input label { @apply text-linha transition-colors; }
+  .estrelas-input input:checked ~ label,
+  .estrelas-input label:hover,
+  .estrelas-input label:hover ~ label { @apply text-aviso; }
+  .estrelas-input input:checked ~ label svg,
+  .estrelas-input label:hover svg,
+  .estrelas-input label:hover ~ label svg { fill: currentColor; }
+  .estrelas-input input:focus-visible + label { @apply rounded-md ring-2 ring-marca; }
+
+  .selo-novo { @apply inline-flex items-center rounded-md bg-marca-suave px-2 py-0.5 text-xs font-semibold text-marca; }
+
+  /* Faixa horizontal com scroll (mobile) e grelha (desktop) */
+  .faixa { @apply flex gap-3 overflow-x-auto snap-x snap-mandatory pb-2 -mx-4 px-4 sm:mx-0 sm:px-0; scrollbar-width: none; }
+  .faixa::-webkit-scrollbar { display: none; }
+  .faixa > * { @apply snap-start shrink-0; }
+
+  .prosa { @apply text-[15px] leading-7 text-tinta/90; }
+  .prosa p { @apply mb-4 max-w-prose; }
+  .prosa h2 { @apply mt-8 mb-3 text-xl font-bold; }
+  .prosa ul { @apply mb-4 list-disc pl-5 space-y-1; }
+  .prosa a { @apply link; }
+
+  /* Corpo dos artigos do blog: só filhos directos, para não afectar os cartões de produto embutidos */
+  .artigo { @apply text-[17px] leading-8 text-tinta/90; }
+  .artigo > p { @apply mb-5; }
+  .artigo > h2 { @apply mt-10 mb-3 scroll-mt-40 font-display text-2xl font-bold text-tinta; }
+  .artigo > h3 { @apply mt-8 mb-2 scroll-mt-40 font-display text-xl font-bold text-tinta; }
+  .artigo > ul, .artigo > ol { @apply mb-5 space-y-2 pl-6; }
+  .artigo > ul { @apply list-disc; }
+  .artigo > ol { @apply list-decimal; }
+  .artigo > ul li::marker, .artigo > ol li::marker { @apply text-marca; }
+  .artigo > blockquote { @apply my-6 rounded-r-xl border-l-4 border-marca bg-marca-suave/50 px-5 py-4 text-tinta; }
+  .artigo > table { @apply my-6 block w-full overflow-x-auto text-[15px]; }
+  .artigo > table th, .artigo > table td { @apply border-b border-linha px-3 py-2 text-left align-top; }
+  .artigo > table th { @apply bg-elevado font-semibold; }
+  .artigo > :is(p, ul, ol, blockquote, table) a { @apply font-semibold text-marca underline underline-offset-4 hover:no-underline; }
+  .artigo strong { @apply font-semibold text-tinta; }
+
+  .skeleton { @apply animate-pulse rounded-lg bg-elevado; }
+}
+
+@layer utilities {
+  /* Elementos absolutos (ex.: .sr-only em cabeçalhos de tabela) ficam recortados
+     pelo contentor com scroll em vez de alargarem a página no mobile */
+  .overflow-x-auto, .overflow-auto { position: relative; }
+  .texto-equilibrado { text-wrap: balance; }
+  .num { font-variant-numeric: tabular-nums; }
+  .sem-scrollbar { scrollbar-width: none; }
+  .sem-scrollbar::-webkit-scrollbar { display: none; }
+  .pb-seguro { padding-bottom: env(safe-area-inset-bottom); }
+}
+
+/* Na página de produto (mobile) o WhatsApp sobe acima da barra de compra */
+@media (max-width: 1023px) {
+  body:has([data-barra-compra]) .botao-whatsapp { bottom: 9.5rem; }
+  body:has([data-barra-compra]) .barra-comparar { bottom: 9.5rem; }
+}

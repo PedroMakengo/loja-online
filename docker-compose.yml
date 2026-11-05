@@ -1,0 +1,69 @@
+# =====================================================================
+# DIOTEKNO — stack para o Coolify (Build Pack: Docker Compose)
+#
+# As variáveis SERVICE_* são geradas pelo Coolify automaticamente:
+#   SERVICE_FQDN_APP_80     -> domínio público da loja (porta 80 do contentor)
+#   SERVICE_USER_MYSQL / SERVICE_PASSWORD_MYSQL / SERVICE_PASSWORD_MYSQLROOT
+#   SERVICE_PASSWORD_64_WEBHOOK -> segredo dos webhooks de pagamento
+# Fora do Coolify (docker compose up) usam os valores por omissão abaixo.
+# =====================================================================
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    environment:
+      - SERVICE_FQDN_APP_80
+      - AMBIENTE=${AMBIENTE:-prod}
+      - PAGAMENTOS_SIMULADOS=${PAGAMENTOS_SIMULADOS:-1}
+      - EMAIL_DRIVER=${EMAIL_DRIVER:-log}
+      - EMAIL_LOJA=${EMAIL_LOJA:-geral@diotekno.ao}
+      - DB_HOST=mysql
+      - DB_PORT=3306
+      - DB_NOME=${DB_NOME:-diotekno_loja}
+      - DB_USER=${SERVICE_USER_MYSQL:-diotekno}
+      - DB_PASS=${SERVICE_PASSWORD_MYSQL:-diotekno_dev}
+      - SEGREDO_WEBHOOK=${SERVICE_PASSWORD_64_WEBHOOK:-mudar-este-segredo-em-producao}
+      - MIGRAR_NO_ARRANQUE=1
+    volumes:
+      - diotekno-storage:/var/www/html/storage
+      - diotekno-produtos:/var/www/html/assets/img/produtos/uploads
+      - diotekno-blog:/var/www/html/assets/img/blog/uploads
+    depends_on:
+      mysql:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "-o", "/dev/null", "http://localhost/"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 60s
+
+  mysql:
+    image: mysql:8.0
+    restart: unless-stopped
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
+      - --default-time-zone=+01:00
+    environment:
+      - MYSQL_DATABASE=${DB_NOME:-diotekno_loja}
+      - MYSQL_USER=${SERVICE_USER_MYSQL:-diotekno}
+      - MYSQL_PASSWORD=${SERVICE_PASSWORD_MYSQL:-diotekno_dev}
+      - MYSQL_ROOT_PASSWORD=${SERVICE_PASSWORD_MYSQLROOT:-root_dev}
+    volumes:
+      - diotekno-mysql:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-uroot", "-p${SERVICE_PASSWORD_MYSQLROOT:-root_dev}"]
+      interval: 10s
+      timeout: 5s
+      retries: 20
+      start_period: 30s
+
+volumes:
+  diotekno-storage:
+  diotekno-produtos:
+  diotekno-blog:
+  diotekno-mysql:

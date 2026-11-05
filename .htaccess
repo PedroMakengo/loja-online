@@ -1,0 +1,48 @@
+# =====================================================================
+# DIOTEKNO — reescrita de URLs. Abre na raiz, sem /public e sem
+# RewriteBase (funciona também numa subpasta sem alterações).
+# =====================================================================
+Options -Indexes
+DirectoryIndex index.php
+
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+
+    # Bloquear acesso directo a pastas internas
+    RewriteRule ^(app|core|config|database|src|storage|node_modules)(/|$) - [F,L]
+
+    # Ficheiros e pastas reais (assets) são servidos directamente
+    RewriteCond %{REQUEST_FILENAME} -f [OR]
+    RewriteCond %{REQUEST_FILENAME} -d
+    RewriteRule ^ - [L]
+
+    # Tudo o resto passa pelo front controller
+    RewriteRule ^ index.php [L,QSA]
+</IfModule>
+
+# Ficheiros sensíveis
+<FilesMatch "\.(sql|md|json|lock|log|env|ini)$|^(tailwind\.config\.js|package.*)$">
+    Require all denied
+</FilesMatch>
+
+# Cache longa para assets versionados (?v=)
+<IfModule mod_expires.c>
+    ExpiresActive On
+    ExpiresByType text/css "access plus 1 year"
+    ExpiresByType application/javascript "access plus 1 year"
+    ExpiresByType image/svg+xml "access plus 1 year"
+    ExpiresByType image/webp "access plus 1 year"
+    ExpiresByType image/png "access plus 1 year"
+    ExpiresByType image/jpeg "access plus 1 year"
+    ExpiresByType font/woff2 "access plus 1 year"
+</IfModule>
+
+<IfModule mod_deflate.c>
+    AddOutputFilterByType DEFLATE text/html text/css application/javascript application/json image/svg+xml application/xml text/plain
+</IfModule>
+
+<IfModule mod_headers.c>
+    Header always set X-Content-Type-Options "nosniff"
+    Header always set X-Frame-Options "SAMEORIGIN"
+    Header always set Referrer-Policy "strict-origin-when-cross-origin"
+</IfModule>

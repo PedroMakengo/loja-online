@@ -1,0 +1,13 @@
+{
+  "name": "diotekno-loja",
+  "private": true,
+  "scripts": {
+    "css": "tailwindcss -i ./src/app.css -o ./assets/css/app.css --minify",
+    "css:watch": "tailwindcss -i ./src/app.css -o ./assets/css/app.css --watch"
+  },
+  "devDependencies": {
+    "tailwindcss": "^3.4.0",
+    "@fontsource/bricolage-grotesque": "^5.0.0",
+    "@fontsource/figtree": "^5.0.0"
+  }
+}

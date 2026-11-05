@@ -1,0 +1,10 @@
+.git
+.gitignore
+node_modules
+storage/logs/*
+storage/comprovativos/*
+docker-compose*.yml
+.env
+.env.*
+*.md
+servidor-dev.php

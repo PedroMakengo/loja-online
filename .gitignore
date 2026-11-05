@@ -1,0 +1,7 @@
+node_modules/
+storage/logs/*
+!storage/logs/.gitkeep
+storage/comprovativos/
+.env
+.env.*
+!.env.example
