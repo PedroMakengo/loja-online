@@ -9,6 +9,7 @@ use Core\Auth;
 use Core\Controller;
 use Core\Email;
 use Core\Flash;
+use Core\Google;
 use Core\Validador;
 use App\Models\Carrinho;
 use App\Models\Cliente;
@@ -106,13 +107,109 @@ class AuthController extends Controller
 
         Auth::entrar($id);
         (new Carrinho())->associarCliente($id);
-
-        Email::enviar($d['email'], 'Bem-vindo à ' . NOME_SITE,
-            '<p>Olá ' . e(explode(' ', $d['nome'])[0]) . ',</p>'
-            . '<p>A sua conta foi criada. Pode acompanhar pedidos, guardar moradas e favoritos em <a href="' . URL_BASE . '/conta">A minha conta</a>.</p>'
-            . '<p>Use o código <strong>BEMVINDO10</strong> para 10% de desconto na primeira compra.</p>');
+        $this->emailBoasVindas($d['email'], $d['nome']);
 
         Flash::definir('ok', 'Conta criada. Bem-vindo à ' . NOME_SITE . '!');
+        $this->redirecionar($voltar);
+    }
+
+    private function emailBoasVindas(string $email, string $nome): void
+    {
+        Email::enviar($email, 'Bem-vindo à ' . NOME_SITE,
+            '<p>Olá ' . e(explode(' ', $nome)[0]) . ',</p>'
+            . '<p>A sua conta foi criada. Pode acompanhar pedidos, guardar moradas e favoritos em <a href="' . URL_BASE . '/conta">A minha conta</a>.</p>'
+            . '<p>Use o código <strong>BEMVINDO10</strong> para 10% de desconto na primeira compra.</p>');
+    }
+
+    // ----- Entrar / criar conta com o Google -----------------------------------
+
+    /** GET /entrar/google — guarda state + nonce na sessão e envia para o Google. */
+    public function google(): void
+    {
+        $voltar = caminhoSeguro($_GET['voltar'] ?? null);
+        if (!Google::activo()) {
+            Flash::definir('erro', 'O acesso com o Google não está disponível de momento.');
+            $this->redirecionar('/entrar?voltar=' . urlencode($voltar));
+        }
+        if (Auth::autenticado()) {
+            $this->redirecionar($voltar);
+        }
+
+        $estado = bin2hex(random_bytes(16));
+        $nonce  = bin2hex(random_bytes(16));
+        $_SESSION['google_oauth'] = ['estado' => $estado, 'nonce' => $nonce, 'voltar' => $voltar, 'em' => time()];
+
+        header('Location: ' . Google::urlAutorizacao($estado, $nonce));
+        exit;
+    }
+
+    /** GET /entrar/google/retorno — o Google volta aqui com ?code=…&state=… */
+    public function googleRetorno(): void
+    {
+        $pedido = $_SESSION['google_oauth'] ?? null;
+        unset($_SESSION['google_oauth']); // uso único
+        $voltar = caminhoSeguro($pedido['voltar'] ?? null);
+        $falhar = function (string $mensagem) use ($voltar): void {
+            Flash::definir('erro', $mensagem);
+            $this->redirecionar('/entrar?voltar=' . urlencode($voltar));
+        };
+
+        if (isset($_GET['error'])) {
+            $falhar($_GET['error'] === 'access_denied'
+                ? 'Cancelou o acesso com o Google. Pode entrar com email e senha.'
+                : 'O Google não autorizou o acesso. Tente novamente.');
+        }
+        if (!$pedido || !Google::activo()
+            || !hash_equals((string) $pedido['estado'], (string) ($_GET['state'] ?? ''))
+            || time() - (int) $pedido['em'] > 600
+            || empty($_GET['code'])) {
+            $falhar('A ligação ao Google expirou. Tente novamente.');
+        }
+
+        try {
+            $g = Google::trocarCodigo((string) $_GET['code'], (string) $pedido['nonce']);
+        } catch (\Throwable $ex) {
+            error_log('[google] ' . $ex->getMessage());
+            $falhar('Não foi possível entrar com o Google. Tente novamente ou use email e senha.');
+        }
+
+        $modelo  = new Cliente();
+        $cliente = $modelo->porGoogleId($g['sub']);
+        $nova    = false;
+
+        if (!$cliente) {
+            if (!$g['email_verified']) {
+                $falhar('O email desta conta Google não está verificado. Crie conta com email e senha.');
+            }
+            $cliente = $modelo->porEmail($g['email']);
+            if ($cliente) {
+                if (!empty($cliente['google_id'])) {
+                    // O email já está ligado a outra conta Google
+                    $falhar('Este email já está ligado a outra conta Google. Entre com email e senha.');
+                }
+                $modelo->ligarGoogle((int) $cliente['id'], $g['sub'], $g['foto']);
+            } else {
+                $id      = $modelo->registarGoogle($g);
+                $cliente = $modelo->porId($id);
+                $nova    = true;
+            }
+        }
+
+        if (($cliente['estado'] ?? '') !== 'activo') {
+            $falhar('Esta conta está suspensa. Contacte-nos pelo WhatsApp.');
+        }
+
+        $id = (int) $cliente['id'];
+        Auth::limparFalhas($cliente['email']);
+        Auth::entrar($id, true);
+        (new Carrinho())->associarCliente($id);
+
+        if ($nova) {
+            $this->emailBoasVindas($cliente['email'], $cliente['nome']);
+            Flash::definir('ok', 'Conta criada com o Google. Bem-vindo à ' . NOME_SITE . '! Indique o seu telemóvel em "Os meus dados" para combinarmos a entrega.');
+        } else {
+            Flash::definir('ok', 'Olá, ' . explode(' ', $cliente['nome'])[0] . '. Sessão iniciada com o Google.');
+        }
         $this->redirecionar($voltar);
     }
 

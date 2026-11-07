@@ -30,6 +30,15 @@ Variáveis de ambiente (já com valores por omissão no `docker-compose.yml`):
 | `EMAIL_LOJA` | `geral@diotekno.ao` | remetente dos emails |
 | `DB_HOST` / `DB_PORT` / `DB_NOME` / `DB_USER` / `DB_PASS` | serviço `mysql` | ligação à BD (dá para apontar a uma BD gerida pelo Coolify) |
 | `SEGREDO_WEBHOOK` | gerado | assinatura HMAC dos webhooks de pagamento |
+| `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` | vazio | "Continuar com o Google" em /entrar e /registar (sem elas o botão não aparece) |
+| `GOOGLE_REDIRECT_URI` | automático | só se o proxy alterar o host; por omissão `<URL do site>/entrar/google/retorno` |
+
+**Entrar com o Google:** em [console.cloud.google.com](https://console.cloud.google.com) → *APIs e serviços* →
+*Ecrã de consentimento OAuth* (tipo Externo, âmbitos `openid`, `email`, `profile`, publicar a app) →
+*Credenciais* → *Criar ID do cliente OAuth* → **Aplicação Web**, com o URI de redireccionamento autorizado
+`https://<domínio>/entrar/google/retorno` (e `http://localhost/diotekno-loja/loja-online/entrar/google/retorno` para testes no XAMPP).
+Copiar o ID e o segredo para as variáveis acima. Uma conta Google cujo email já existe na loja fica ligada
+a essa conta; as contas novas não têm senha até o cliente a definir em *Os meus dados*.
 
 Volumes persistentes: `storage/` (logs e comprovativos), `assets/img/produtos/uploads`,
 `assets/img/blog/uploads` e os dados do MySQL. O CSS é compilado na build (Tailwind).

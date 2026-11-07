@@ -80,7 +80,9 @@ class ContaController extends Controller
         $modelo = new Cliente();
         $v = (new Validador($_POST))->senha('senha', 'senha_confirmacao');
 
-        if (!$modelo->senhaCorrecta($this->clienteId, (string) ($_POST['senha_actual'] ?? ''))) {
+        // Conta criada pelo Google: ainda não tem senha própria, por isso não se pede a actual
+        $semSenha = (int) (Auth::cliente()['senha_definida'] ?? 1) === 0;
+        if (!$semSenha && !$modelo->senhaCorrecta($this->clienteId, (string) ($_POST['senha_actual'] ?? ''))) {
             $v->adicionarErro('senha_actual', 'A senha actual não está correcta.');
         }
         if ($v->falhou()) {
@@ -90,7 +92,9 @@ class ContaController extends Controller
 
         $modelo->alterarSenha($this->clienteId, $v->dados()['senha']);
         Auth::entrar($this->clienteId); // nova sessão
-        Flash::definir('ok', 'Senha alterada. As sessões noutros dispositivos foram terminadas.');
+        Flash::definir('ok', $semSenha
+            ? 'Senha definida. Já pode entrar também com email e senha.'
+            : 'Senha alterada. As sessões noutros dispositivos foram terminadas.');
         $this->redirecionar('/conta/dados');
     }
 

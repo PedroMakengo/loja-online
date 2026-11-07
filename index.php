@@ -82,6 +82,8 @@ $router->post('/newsletter', [ContactoController::class, 'newsletter']);
 // ----- Autenticação (Fase 2) ---------------------------------------------
 $router->get('/entrar', [AuthController::class, 'entrar']);
 $router->post('/entrar', [AuthController::class, 'autenticar']);
+$router->get('/entrar/google', [AuthController::class, 'google']);
+$router->get('/entrar/google/retorno', [AuthController::class, 'googleRetorno']);
 $router->get('/registar', [AuthController::class, 'registar']);
 $router->post('/registar', [AuthController::class, 'criarConta']);
 $router->post('/sair', [AuthController::class, 'sair']);

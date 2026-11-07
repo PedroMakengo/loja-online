@@ -5,6 +5,8 @@
             <h1 id="t-entrar" class="font-display text-3xl font-extrabold">Entrar</h1>
             <p class="mt-1 text-suave">Use o email e a senha da sua conta DIOTEKNO.</p>
 
+            <?php $acaoGoogle = 'entrar'; require __DIR__ . '/_google.php'; ?>
+
             <form action="<?= url('/entrar') ?>" method="post" class="mt-6 space-y-4" novalidate>
                 <?= \Core\Csrf::campo() ?>
                 <input type="hidden" name="voltar" value="<?= e($voltar) ?>">

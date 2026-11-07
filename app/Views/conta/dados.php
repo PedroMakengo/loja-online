@@ -44,16 +44,27 @@
 
             <form id="senha" action="<?= url('/conta/senha') ?>" method="post" class="cartao p-5 sm:p-6 space-y-4 scroll-mt-40" novalidate>
                 <?= \Core\Csrf::campo() ?>
+                <?php $semSenha = (int) ($cliente['senha_definida'] ?? 1) === 0; ?>
                 <div>
-                    <h2 class="font-display text-lg font-bold">Alterar senha</h2>
-                    <p class="text-sm text-suave">Ao alterar, as sessões abertas noutros dispositivos terminam.</p>
+                    <h2 class="font-display text-lg font-bold"><?= $semSenha ? 'Definir senha' : 'Alterar senha' ?></h2>
+                    <p class="text-sm text-suave"><?= $semSenha
+                        ? 'A sua conta foi criada com o Google. Defina uma senha se quiser também entrar com email e senha.'
+                        : 'Ao alterar, as sessões abertas noutros dispositivos terminam.' ?></p>
                 </div>
-                <?php $campoSenha = ['senha_actual', 'senha_actual', 'Senha actual', 'current-password']; require RAIZ . '/app/Views/partials/campo-senha.php'; ?>
+                <?php if (!empty($cliente['google_id'])): ?>
+                    <p class="flex items-center gap-2 rounded-xl border border-linha bg-elevado px-3 py-2 text-sm">
+                        <?php require RAIZ . '/app/Views/partials/google-logo.php'; ?>
+                        <span>Conta ligada ao Google — pode entrar com o botão <strong>Continuar com o Google</strong>.</span>
+                    </p>
+                <?php endif; ?>
+                <?php if (!$semSenha): ?>
+                    <?php $campoSenha = ['senha_actual', 'senha_actual', 'Senha actual', 'current-password']; require RAIZ . '/app/Views/partials/campo-senha.php'; ?>
+                <?php endif; ?>
                 <div class="grid gap-4 sm:grid-cols-2">
                     <?php $campoSenha = ['senha', 'senha-nova', 'Nova senha', 'new-password', 'Mínimo 8 caracteres, com letras e números.']; require RAIZ . '/app/Views/partials/campo-senha.php'; ?>
                     <?php $campoSenha = ['senha_confirmacao', 'senha-conf', 'Repetir nova senha', 'new-password']; require RAIZ . '/app/Views/partials/campo-senha.php'; ?>
                 </div>
-                <button class="btn-secundario">Alterar senha</button>
+                <button class="btn-secundario"><?= $semSenha ? 'Definir senha' : 'Alterar senha' ?></button>
             </form>
         </div>
     </div>

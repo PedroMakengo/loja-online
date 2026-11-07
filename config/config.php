@@ -15,6 +15,29 @@ function env(string $nome, ?string $padrao = null): ?string
     return ($v === null || $v === '') ? $padrao : (string) $v;
 }
 
+// Ficheiro .env na raiz do projecto (XAMPP / docker compose local). Fica fora do Git.
+// Não substitui variáveis já definidas pelo servidor (Coolify tem sempre prioridade).
+(function (string $ficheiro): void {
+    if (!is_file($ficheiro) || !is_readable($ficheiro)) {
+        return;
+    }
+    foreach (file($ficheiro, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES) as $linha) {
+        $linha = trim($linha);
+        if ($linha === '' || $linha[0] === '#' || !str_contains($linha, '=')) {
+            continue;
+        }
+        [$nome, $valor] = array_map('trim', explode('=', $linha, 2));
+        if (preg_match('/^[A-Z][A-Z0-9_]*$/', $nome) !== 1 || getenv($nome) !== false) {
+            continue;
+        }
+        if (strlen($valor) >= 2 && ($valor[0] === '"' || $valor[0] === "'") && substr($valor, -1) === $valor[0]) {
+            $valor = substr($valor, 1, -1);
+        }
+        putenv("$nome=$valor");
+        $_ENV[$nome] = $valor;
+    }
+})(dirname(__DIR__) . '/.env');
+
 // Ambiente: 'dev' mostra erros; 'prod' esconde-os e regista em log.
 // No Coolify/Docker vem da variável AMBIENTE (por omissão 'dev' no XAMPP local).
 define('AMBIENTE', env('AMBIENTE', 'dev') === 'prod' ? 'prod' : 'dev');
@@ -72,8 +95,17 @@ define('URL_BASE', URL_ORIGEM . BASE_PATH);
 
 define('RAIZ', dirname(__DIR__));
 
+// ---------------------------------------------------------------------
+// Entrar com o Google (Google Cloud Console → APIs e serviços → Credenciais
+// → ID do cliente OAuth "Aplicação Web"). Sem estas variáveis o botão não aparece.
+// URI de redireccionamento autorizado: <URL do site>/entrar/google/retorno
+// ---------------------------------------------------------------------
+define('GOOGLE_CLIENT_ID', env('GOOGLE_CLIENT_ID', ''));
+define('GOOGLE_CLIENT_SECRET', env('GOOGLE_CLIENT_SECRET', ''));
+define('GOOGLE_REDIRECT_URI', env('GOOGLE_REDIRECT_URI', '')); // opcional: fixa o URI se o proxy mudar o host
+
 // Versão dos assets — mudar após recompilar CSS/JS para limpar cache.
-define('VERSAO_ASSETS', '1.9.1');
+define('VERSAO_ASSETS', '1.9.2');
 
 // ---------------------------------------------------------------------
 // Sessão segura

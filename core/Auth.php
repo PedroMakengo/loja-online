@@ -29,7 +29,7 @@ class Auth
             $id = self::restaurarLembrado();
         }
         if ($id) {
-            $c = Database::ligacao()->prepare("SELECT id, nome, email, telefone, nif, pontos, aceita_marketing, recebe_lembretes, criado_em FROM clientes WHERE id = ? AND estado = 'activo'");
+            $c = Database::ligacao()->prepare("SELECT id, nome, email, telefone, nif, pontos, aceita_marketing, recebe_lembretes, google_id, avatar_url, senha_definida, criado_em FROM clientes WHERE id = ? AND estado = 'activo'");
             $c->execute([$id]);
             self::$cliente = $c->fetch() ?: null;
             if (!self::$cliente) {

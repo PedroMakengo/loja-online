@@ -60,10 +60,43 @@ class Cliente extends Model
         return password_verify($senha, (string) $this->valor("SELECT senha_hash FROM clientes WHERE id = ?", [$id]));
     }
 
+    // ----- Conta Google ----------------------------------------------------
+
+    public function porGoogleId(string $sub): ?array
+    {
+        return $this->um("SELECT * FROM clientes WHERE google_id = ? LIMIT 1", [$sub]);
+    }
+
+    /** Liga uma conta existente ao Google (o Google confirmou que o email é do cliente). */
+    public function ligarGoogle(int $id, string $sub, string $foto): void
+    {
+        $this->executar(
+            "UPDATE clientes SET google_id = ?, avatar_url = COALESCE(NULLIF(?, ''), avatar_url), email_verificado_em = COALESCE(email_verificado_em, NOW()) WHERE id = ?",
+            [$sub, $foto, $id]
+        );
+    }
+
+    /** Conta nova a partir do Google: sem telefone e com uma senha aleatória que ninguém conhece. */
+    public function registarGoogle(array $g): int
+    {
+        $nome = $g['nome'] !== '' ? $g['nome'] : explode('@', $g['email'])[0];
+        return $this->inserir([
+            'nome'                => mb_substr($nome, 0, 140),
+            'email'               => $g['email'],
+            'telefone'            => null,
+            'senha_hash'          => password_hash(bin2hex(random_bytes(32)), PASSWORD_DEFAULT),
+            'google_id'           => $g['sub'],
+            'avatar_url'          => $g['foto'] !== '' ? mb_substr($g['foto'], 0, 500) : null,
+            'senha_definida'      => 0,
+            'aceita_marketing'    => 0,
+            'email_verificado_em' => date('Y-m-d H:i:s'),
+        ]);
+    }
+
     public function alterarSenha(int $id, string $senha): void
     {
         $this->executar(
-            "UPDATE clientes SET senha_hash = ?, token_recuperacao = NULL, token_expira_em = NULL WHERE id = ?",
+            "UPDATE clientes SET senha_hash = ?, senha_definida = 1, token_recuperacao = NULL, token_expira_em = NULL WHERE id = ?",
             [password_hash($senha, PASSWORD_DEFAULT), $id]
         );
         // Termina sessões "lembradas" noutros dispositivos

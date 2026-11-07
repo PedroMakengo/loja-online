@@ -5,6 +5,8 @@
             <h1 id="t-registar" class="font-display text-3xl font-extrabold">Criar conta</h1>
             <p class="mt-1 text-suave">Demora menos de um minuto.</p>
 
+            <?php $acaoGoogle = 'registar'; require __DIR__ . '/_google.php'; ?>
+
             <form action="<?= url('/registar') ?>" method="post" class="mt-6 space-y-4" novalidate>
                 <?= \Core\Csrf::campo() ?>
                 <input type="hidden" name="voltar" value="<?= e($voltar) ?>">
