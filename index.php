@@ -31,6 +31,7 @@ use App\Controllers\Admin\PedidosController as AdminPedidos;
 use App\Controllers\Admin\ProdutosController as AdminProdutos;
 use App\Controllers\Admin\ClientesController as AdminClientes;
 use App\Controllers\Admin\CrudController;
+use App\Controllers\Admin\CategoriasController as AdminCategorias;
 use App\Controllers\Admin\RelatoriosController;
 use App\Controllers\Admin\AnaliseController;
 use App\Controllers\Admin\MensagensController;
@@ -198,6 +199,15 @@ $router->post('/admin/administradores', [AdminsController::class, 'criar']);
 $router->post('/admin/administradores/{id}/alternar', [AdminsController::class, 'alternar']);
 
 // Motor genérico (categorias, marcas, cupões, banners, zonas de entrega)
+// Árvore de categorias (categoria › subcategoria › sub-subcategoria)
+$router->get('/admin/categorias', [AdminCategorias::class, 'index']);
+$router->get('/admin/c/categorias', [AdminCategorias::class, 'index']); // endereço antigo
+$router->get('/admin/categorias/novo', [AdminCategorias::class, 'novo']);
+$router->post('/admin/categorias/guardar', [AdminCategorias::class, 'guardar']);
+$router->get('/admin/categorias/{id}', [AdminCategorias::class, 'editar']);
+$router->post('/admin/categorias/{id}/apagar', [AdminCategorias::class, 'apagar']);
+$router->post('/admin/categorias/{id}/mover-produtos', [AdminCategorias::class, 'moverProdutos']);
+
 $router->get('/admin/c/{entidade}', [CrudController::class, 'index']);
 $router->get('/admin/c/{entidade}/novo', [CrudController::class, 'novo']);
 $router->post('/admin/c/{entidade}/guardar', [CrudController::class, 'guardar']);

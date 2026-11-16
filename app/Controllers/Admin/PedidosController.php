@@ -7,9 +7,9 @@
 namespace App\Controllers\Admin;
 
 use Core\AdminAuth;
-use Core\Email;
 use Core\Flash;
 use App\Models\Pedido;
+use App\Servicos\Notificacoes;
 use App\Servicos\Pagamentos;
 
 class PedidosController extends Base
@@ -276,10 +276,6 @@ class PedidosController extends Base
 
     private function avisarCliente(array $pedido, string $assunto, string $html): void
     {
-        $st = $this->db()->prepare("SELECT nome, email FROM clientes WHERE id = ?");
-        $st->execute([$pedido['cliente_id']]);
-        if ($c = $st->fetch()) {
-            Email::enviar($c['email'], $assunto, '<p>Olá ' . e(explode(' ', $c['nome'])[0]) . ',</p>' . $html);
-        }
+        Notificacoes::cliente((int) $pedido['cliente_id'], $assunto, $html);
     }
 }

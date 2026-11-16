@@ -180,6 +180,11 @@ class Pagamentos
             . '<p>Recebemos o pagamento de <strong>' . kz($pg['valor']) . '</strong> do pedido <strong>' . e($pg['numero']) . '</strong>. Já estamos a prepará-lo.</p>'
             . ($pontos > 0 ? '<p>Ganhou <strong>' . $pontos . ' pontos</strong> com esta compra. Saldo actual: ' . (int) $cliente['pontos'] . ' pontos.</p>' : '')
             . '<p><a href="' . URL_BASE . '/conta/pedidos/' . $pg['numero'] . '">Acompanhar o pedido</a></p>');
+
+        Notificacoes::loja('Pagamento confirmado — preparar ' . $pg['numero'],
+            '<p>O pedido <strong>' . e($pg['numero']) . '</strong> está pago (' . kz($pg['valor']) . ', ' . e(self::nome($pg['metodo'])) . ').</p>'
+            . '<p>' . e($nota) . '</p><p>Próximo passo: separar os produtos e marcar "Em preparação".</p>'
+            . Notificacoes::linkAdmin($pg['numero']));
         return true;
     }
 
@@ -203,8 +208,9 @@ class Pagamentos
             $pedidoId = (int) $db->query("SELECT pedido_id FROM pagamentos WHERE id = " . (int) $id)->fetchColumn();
             // Push expirado: o cliente pode tentar de novo. Restantes: o pedido é cancelado.
             $metodo = $db->query("SELECT metodo FROM pagamentos WHERE id = " . (int) $id)->fetchColumn();
-            if ((self::METODOS[$metodo]['tipo'] ?? '') !== 'push') {
-                \App\Models\Pedido::cancelarComStock($pedidoId, 'Prazo de pagamento terminou.');
+            if ((self::METODOS[$metodo]['tipo'] ?? '') !== 'push'
+                && \App\Models\Pedido::cancelarComStock($pedidoId, 'Prazo de pagamento terminou.')) {
+                Notificacoes::canceladoPorFaltaDePagamento($pedidoId);
             }
         }
         // Pedidos abandonados há mais de 72 h (ex.: push expirado e nunca repetido)
@@ -214,7 +220,9 @@ class Pagamentos
               LIMIT 100"
         )->fetchAll(PDO::FETCH_COLUMN);
         foreach ($velhos as $pid) {
-            \App\Models\Pedido::cancelarComStock((int) $pid, 'Cancelado por falta de pagamento.');
+            if (\App\Models\Pedido::cancelarComStock((int) $pid, 'Cancelado por falta de pagamento.')) {
+                Notificacoes::canceladoPorFaltaDePagamento((int) $pid);
+            }
         }
 
         return count($ids) + count($velhos);

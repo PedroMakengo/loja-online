@@ -12,23 +12,8 @@
 $provincias = ['Bengo', 'Benguela', 'Bié', 'Cabinda', 'Cuando', 'Cuanza Norte', 'Cuanza Sul', 'Cubango', 'Cunene', 'Huambo', 'Huíla',
                'Icolo e Bengo', 'Luanda', 'Lunda Norte', 'Lunda Sul', 'Malanje', 'Moxico', 'Moxico Leste', 'Namibe', 'Uíge', 'Zaire'];
 
+// Categorias têm gestor próprio (árvore com subcategorias): Admin\CategoriasController.
 return [
-    'categorias' => [
-        'titulo' => 'Categorias', 'singular' => 'categoria', 'area' => 'catalogo', 'ordem' => 'ordem, nome',
-        'pesquisa' => ['nome'],
-        'contagem' => ["SELECT COUNT(*) FROM produtos WHERE categoria_id = ?", 'produtos'],
-        'campos' => [
-            'nome'           => ['tipo' => 'texto', 'rotulo' => 'Nome', 'obrigatorio' => true, 'max' => 120, 'lista' => true],
-            'slug'           => ['tipo' => 'slug', 'rotulo' => 'Endereço (URL)', 'de' => 'nome', 'unico' => true, 'ajuda' => 'Fica em /categoria/endereco. Gerado a partir do nome se ficar vazio.', 'lista' => true],
-            'descricao'      => ['tipo' => 'textarea', 'rotulo' => 'Descrição curta', 'max' => 255],
-            'ordem'          => ['tipo' => 'numero', 'rotulo' => 'Ordem no menu', 'lista' => true],
-            'destaque'       => ['tipo' => 'booleano', 'rotulo' => 'Mostrar na página inicial', 'lista' => true],
-            'activo'         => ['tipo' => 'booleano', 'rotulo' => 'Activa', 'padrao' => 1, 'lista' => true],
-            'meta_titulo'    => ['tipo' => 'texto', 'rotulo' => 'Título para o Google', 'max' => 160, 'ajuda' => 'Opcional. Até 60 caracteres aparecem completos.'],
-            'meta_descricao' => ['tipo' => 'textarea', 'rotulo' => 'Descrição para o Google', 'max' => 255],
-        ],
-    ],
-
     'marcas' => [
         'titulo' => 'Marcas', 'singular' => 'marca', 'area' => 'catalogo', 'ordem' => 'nome',
         'pesquisa' => ['nome'],

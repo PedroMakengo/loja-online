@@ -5,7 +5,7 @@ use App\Models\Carrinho;
 use Core\Auth;
 use Core\Flash;
 
-$menuCategorias = (new Categoria())->todasActivas();
+$menuCategorias = (new Categoria())->arvore(); // categorias de topo com 'filhos' (subcategorias)
 $qtdCarrinho    = (new Carrinho())->contar();
 $clienteSessao  = Auth::cliente();
 $mensagensFlash = Flash::ler();

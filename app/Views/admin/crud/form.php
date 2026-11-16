@@ -29,6 +29,7 @@ $val = function (string $campo, array $f) use ($a, $registo) {
                 <label class="mb-2 flex items-center gap-2.5 text-sm cursor-pointer"><input type="checkbox" name="remover_<?= $campo ?>" value="1" class="h-4 w-4 accent-[rgb(var(--marca))]"> Remover a imagem actual</label>
                 <?php endif; ?>
                 <input id="<?= $id ?>" name="<?= $campo ?>" type="file" accept="image/jpeg,image/png,image/webp" class="campo h-auto py-2 file:mr-3 file:rounded-lg file:border-0 file:bg-elevado file:px-3 file:py-1.5 file:text-sm file:font-semibold" <?= ariaErro($campo) ?>>
+            <?php elseif ($f['tipo'] === 'select'): $ops = $f['opcoes'] ?? $opcoesTabela[$campo] ?? []; ?>
                 <select id="<?= $id ?>" name="<?= $campo ?>" class="campo" <?= ariaErro($campo) ?>>
                     <?php if (empty($f['obrigatorio'])): ?><option value=""><?= e($f['vazio'] ?? '—') ?></option><?php endif; ?>
                     <?php foreach ($ops as $k => $t): ?><option value="<?= e((string) $k) ?>" <?= (string) $v === (string) $k ? 'selected' : '' ?>><?= e($t) ?></option><?php endforeach; ?>

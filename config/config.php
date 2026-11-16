@@ -46,9 +46,18 @@ define('AMBIENTE', env('AMBIENTE', 'dev') === 'prod' ? 'prod' : 'dev');
 // (útil para demonstrações antes de haver contrato com os operadores).
 define('PAGAMENTOS_SIMULADOS', AMBIENTE === 'dev' || env('PAGAMENTOS_SIMULADOS') === '1');
 
-// Emails: 'mail' usa mail() do servidor; 'log' grava em storage/logs/emails.log.
-// Os contentores Docker não têm sendmail — usar 'log' até haver SMTP configurado.
-define('EMAIL_DRIVER', env('EMAIL_DRIVER', AMBIENTE === 'dev' ? 'log' : 'mail'));
+// Emails: 'smtp' (Gmail ou outro SMTP autenticado), 'mail' (mail() do servidor) ou
+// 'log' (grava em storage/logs/emails.log). Com SMTP_HOST definido, o padrão passa a 'smtp'.
+// Os contentores Docker não têm sendmail — em produção usar 'smtp'.
+// Gmail: SMTP_HOST=smtp.gmail.com, SMTP_PORTA=587, SMTP_UTILIZADOR=conta@gmail.com,
+//        SMTP_SENHA=<senha de app de 16 letras> (exige verificação em 2 passos na conta).
+define('SMTP_HOST', env('SMTP_HOST', ''));
+define('SMTP_PORTA', (int) env('SMTP_PORTA', '587'));
+define('SMTP_UTILIZADOR', env('SMTP_UTILIZADOR', ''));
+define('SMTP_SENHA', str_replace(' ', '', env('SMTP_SENHA', ''))); // o Google mostra-a com espaços
+define('SMTP_SEGURANCA', in_array(env('SMTP_SEGURANCA'), ['tls', 'ssl', 'nenhuma'], true)
+    ? env('SMTP_SEGURANCA') : (SMTP_PORTA === 465 ? 'ssl' : 'tls'));
+define('EMAIL_DRIVER', env('EMAIL_DRIVER', SMTP_HOST !== '' ? 'smtp' : (AMBIENTE === 'dev' ? 'log' : 'mail')));
 
 if (AMBIENTE === 'dev') {
     ini_set('display_errors', '1');
@@ -68,6 +77,10 @@ mb_internal_encoding('UTF-8');
 define('NOME_SITE', 'DIOTEKNO');
 define('SLOGAN_SITE', 'Tecnologia com garantia oficial, entregue em todo o país');
 define('EMAIL_LOJA', env('EMAIL_LOJA', 'geral@diotekno.ao'));
+// Remetente ("From"): o Gmail só aceita a própria conta SMTP ou um alias verificado nela.
+define('EMAIL_REMETENTE', env('EMAIL_REMETENTE', SMTP_UTILIZADOR !== '' && str_contains(SMTP_UTILIZADOR, '@') ? SMTP_UTILIZADOR : EMAIL_LOJA));
+// Quem recebe os avisos internos (novo pedido, comprovativo, pagamento, cancelamento). "nao" = desligar.
+define('EMAIL_NOTIFICACOES', env('EMAIL_NOTIFICACOES', EMAIL_LOJA));
 define('TELEFONE_LOJA', '+244 923 000 000');
 define('WHATSAPP_LOJA', '244923000000');          // só dígitos, com indicativo
 define('MORADA_LOJA', 'Rua Rainha Ginga, Ingombota, Luanda');
@@ -91,7 +104,9 @@ define('BASE_PATH', rtrim($scriptDir === '/' ? '' : $scriptDir, '/'));
 $https = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off')
       || (($_SERVER['HTTP_X_FORWARDED_PROTO'] ?? '') === 'https');
 define('URL_ORIGEM', ($https ? 'https' : 'http') . '://' . ($_SERVER['HTTP_HOST'] ?? 'localhost'));
-define('URL_BASE', URL_ORIGEM . BASE_PATH);
+// No cron (CLI) não há pedido HTTP: os links dos emails usam URL_SITE (ex.: https://diotekno.ao).
+$urlSite = PHP_SAPI === 'cli' ? rtrim((string) env('URL_SITE', ''), '/') : '';
+define('URL_BASE', preg_match('#^https?://#', $urlSite) ? $urlSite : URL_ORIGEM . BASE_PATH);
 
 define('RAIZ', dirname(__DIR__));
 

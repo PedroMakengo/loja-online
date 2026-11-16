@@ -12,6 +12,7 @@ use Core\Controller;
 use Core\Database;
 use Core\Flash;
 use App\Models\Pedido;
+use App\Servicos\Notificacoes;
 use App\Servicos\Pagamentos;
 
 class PedidoController extends Controller
@@ -106,6 +107,11 @@ class PedidoController extends Controller
         $db->prepare("INSERT INTO pedido_historico (pedido_id, estado, nota) VALUES (?, 'pendente', ?)")
            ->execute([$pedido['id'], 'Comprovativo de transferência recebido. A verificar com o banco.']);
 
+        Notificacoes::loja('Comprovativo para verificar — ' . $numero,
+            '<p>Chegou o comprovativo de transferência do pedido <strong>' . e($numero) . '</strong> (' . kz($pg['valor']) . ').</p>'
+            . '<p>Confirme a entrada do valor no extracto do banco e depois confirme ou rejeite no painel.</p>'
+            . Notificacoes::linkAdmin($numero));
+
         Flash::definir('ok', 'Comprovativo recebido. Confirmamos o pagamento em até 24 horas úteis.');
         $this->redirecionar('/conta/pedidos/' . $numero);
     }
@@ -149,6 +155,12 @@ class PedidoController extends Controller
     {
         $pedido = $this->pedidoOu404($numero);
         if (Pedido::cancelarComStock((int) $pedido['id'], 'Cancelado pelo cliente.')) {
+            Notificacoes::cliente((int) $pedido['cliente_id'], 'Pedido ' . $numero . ' cancelado',
+                '<p>Cancelámos o pedido <strong>' . e($numero) . '</strong>, como pediu. Não é cobrado nenhum valor.</p>'
+                . '<p>Se mudar de ideias, os produtos continuam na loja: <a href="' . URL_BASE . '/">' . NOME_SITE . '</a>.</p>');
+            Notificacoes::loja('Pedido ' . $numero . ' cancelado pelo cliente',
+                '<p>O cliente cancelou o pedido <strong>' . e($numero) . '</strong> antes de pagar. O stock já foi devolvido.</p>'
+                . Notificacoes::linkAdmin($numero));
             Flash::definir('ok', 'Pedido cancelado.');
         } else {
             Flash::definir('erro', 'Este pedido já não pode ser cancelado aqui. Fale connosco pelo WhatsApp.');

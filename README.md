@@ -26,8 +26,12 @@ Variáveis de ambiente (já com valores por omissão no `docker-compose.yml`):
 |---|---|---|
 | `AMBIENTE` | `prod` | `dev` mostra erros PHP no browser |
 | `PAGAMENTOS_SIMULADOS` | `1` | botões "Simular pagamento" com o driver `simulado`; pôr `0` quando houver operadores reais |
-| `EMAIL_DRIVER` | `log` | `log` grava em `storage/logs/emails.log`; `mail` usa `mail()` (o contentor não tem sendmail) |
-| `EMAIL_LOJA` | `geral@diotekno.ao` | remetente dos emails |
+| `SMTP_HOST` / `SMTP_PORTA` / `SMTP_UTILIZADOR` / `SMTP_SENHA` | vazio / `587` | envio real por SMTP. Gmail: `smtp.gmail.com`, a conta e uma **senha de app** (exige verificação em 2 passos) |
+| `EMAIL_DRIVER` | automático | `smtp` se houver `SMTP_HOST`; senão `log` (grava em `storage/logs/emails.log`). `mail` só onde há sendmail |
+| `EMAIL_LOJA` | `geral@diotekno.ao` | "Responder para" dos emails |
+| `EMAIL_REMETENTE` | `SMTP_UTILIZADOR` | "De" dos emails (o Gmail só aceita a própria conta ou um alias verificado) |
+| `EMAIL_NOTIFICACOES` | `EMAIL_LOJA` | recebe os avisos internos de pedidos (novo, comprovativo, pago, cancelado); `nao` desliga |
+| `URL_SITE` | vazio | `https://<domínio>` — links correctos nos emails enviados pelo cron |
 | `DB_HOST` / `DB_PORT` / `DB_NOME` / `DB_USER` / `DB_PASS` | serviço `mysql` | ligação à BD (dá para apontar a uma BD gerida pelo Coolify) |
 | `SEGREDO_WEBHOOK` | gerado | assinatura HMAC dos webhooks de pagamento |
 | `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` | vazio | "Continuar com o Google" em /entrar e /registar (sem elas o botão não aparece) |
@@ -76,8 +80,10 @@ Depois de recompilar CSS/JS em produção, aumentar `VERSAO_ASSETS` em `config/c
   tokens de recuperação guardados só como hash (válidos 60 min, uso único),
   protecção contra redirecção externa no parâmetro `voltar`.
 - O carrinho do visitante junta-se ao da conta no login; ao sair, o dispositivo fica sem carrinho.
-- Emails: em `AMBIENTE = 'dev'` ficam em `storage/logs/emails.log`; em produção usam `mail()`.
-  A pasta `storage/` tem de ter permissão de escrita.
+- Emails: sem `SMTP_HOST` ficam em `storage/logs/emails.log`; com SMTP (Gmail) são enviados de verdade.
+  Testar com `php cron/testar-email.php destino@exemplo.com`. Falhas de envio não bloqueiam o pedido e
+  ficam em `storage/logs/emails-erros.log`. A pasta `storage/` tem de ter permissão de escrita.
+  Mapa de todos os emails do pedido: `.claude/skills/pedidos-notificacoes/SKILL.md`.
 
 ## Fase 3 — Checkout e pagamentos
 - `/checkout`: morada guardada, entrega (domicílio / expressa em Luanda / levantamento),
@@ -115,7 +121,9 @@ Depois de recompilar CSS/JS em produção, aumentar `VERSAO_ASSETS` em `config/c
   e "promoção do dia", custo com cálculo de margem, campos para o Google. Descrições passam por um
   filtro de HTML que remove scripts e atributos perigosos.
 - **Clientes:** valor gasto, pedidos, moradas, favoritos, bloqueio de conta.
-- **Motor genérico** (`config/crud.php`): categorias, marcas, cupões, banners e zonas de entrega.
+- **Categorias em árvore** (`/admin/categorias`): categoria › subcategoria › sub-subcategoria (até 3 níveis), mega-menu na loja,
+  mover produtos entre categorias. Guia: `.claude/skills/categorias-subcategorias/SKILL.md`.
+- **Motor genérico** (`config/crud.php`): marcas, cupões, banners e zonas de entrega.
   Para acrescentar uma entidade simples basta descrevê-la nesse ficheiro.
 - **Relatórios:** por período, forma de pagamento, categoria, província e produto; margem bruta
   estimada; exportação CSV que abre directamente no Excel em português.
@@ -154,8 +162,8 @@ passando o domínio para os links dos emails ficarem correctos:
 - Todos os emails de marketing levam link de cancelamento assinado e o cabeçalho
   `List-Unsubscribe` com "um clique", exigido pelo Gmail e pelo Yahoo para envios em massa.
 - **Antes de produção:** mudar `segredo_links`; confirmar o limite de envios por hora do alojamento;
-  configurar SPF, DKIM e DMARC no domínio (sem isto os emails vão para o spam). Para volumes maiores,
-  trocar `Email::enviar()` por SMTP de um serviço de envio.
+  configurar SPF, DKIM e DMARC no domínio (sem isto os emails vão para o spam). O Gmail limita
+  ~500 emails/dia (Workspace ~2000): para newsletters grandes, apontar `SMTP_*` a um serviço de envio.
 - Em desenvolvimento os emails ficam em `storage/logs/emails.log`, com os links visíveis.
 
 ## Fase 7 — Blog (`/blog`)

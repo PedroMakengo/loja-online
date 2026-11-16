@@ -250,6 +250,12 @@ class Checkout
             . '<p>Forma de pagamento: ' . e(Pagamentos::nome($dados['metodo_pagamento'])) . '. As instruções estão na página do pedido:</p>'
             . '<p><a href="' . URL_BASE . '/conta/pedidos/' . $numero . '">Ver pedido e pagar</a></p>');
 
+        Notificacoes::loja('Novo pedido ' . $numero . ' — ' . strip_tags(kz($total)),
+            '<p>Novo pedido <strong>' . $numero . '</strong> de ' . e($cliente['nome']) . ' (' . e($cliente['email']) . ').</p>'
+            . '<p>Total: <strong>' . kz($total) . '</strong> · Pagamento: ' . e(Pagamentos::nome($dados['metodo_pagamento'])) . '</p>'
+            . '<p>Aguarda pagamento. Os produtos ficam reservados até o prazo terminar.</p>'
+            . Notificacoes::linkAdmin($numero));
+
         return $numero;
     }
 }

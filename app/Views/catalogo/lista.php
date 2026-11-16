@@ -42,6 +42,21 @@ if (!empty($filtros['stock']))    { $filtrosActivos[] = ['Com stock', urlActual(
     <header class="mt-3 mb-6">
         <h1 class="font-display text-3xl sm:text-4xl font-extrabold"><?= e($titulo) ?></h1>
         <?php if (!empty($descricao)): ?><p class="mt-2 text-suave max-w-2xl"><?= e($descricao) ?></p><?php endif; ?>
+        <?php if (!empty($subcategorias)): ?>
+        <!-- Subcategorias (ou irmãs, numa categoria sem filhas) -->
+        <nav aria-label="Subcategorias" class="mt-4 -mx-4 px-4 overflow-x-auto sem-scrollbar">
+            <ul class="flex gap-2 pb-1 sm:flex-wrap">
+                <?php foreach ($subcategorias as $s): $actual = (int) $s['id'] === (int) ($categoriaActual['id'] ?? 0); ?>
+                <li class="shrink-0">
+                    <a href="<?= url('/categoria/' . $s['slug']) ?>" <?= $actual ? 'aria-current="page"' : '' ?>
+                       class="inline-flex h-9 items-center gap-1.5 rounded-full border px-4 text-sm transition-colors <?= $actual ? 'border-tinta bg-tinta text-superficie font-semibold' : 'border-linha bg-superficie hover:border-tinta/40' ?>">
+                        <?= e($s['nome']) ?> <span class="num text-xs <?= $actual ? 'opacity-70' : 'text-suave' ?>"><?= (int) $s['total_produtos'] ?></span>
+                    </a>
+                </li>
+                <?php endforeach; ?>
+            </ul>
+        </nav>
+        <?php endif; ?>
     </header>
 
     <form method="get" action="<?= e(strtok($_SERVER['REQUEST_URI'], '?')) ?>" class="lg:grid lg:grid-cols-[260px_1fr] lg:gap-8" data-filtros>

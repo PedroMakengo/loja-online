@@ -33,7 +33,7 @@ $menuAdmin = [
     ]],
     ['Catálogo', [
         ['/admin/produtos', 'loja', 'Produtos', 'produtos', $contadores['stock_baixo'] ?? 0],
-        ['/admin/c/categorias', 'filtro', 'Categorias', 'catalogo', null],
+        ['/admin/categorias', 'filtro', 'Categorias', 'catalogo', null],
         ['/admin/c/marcas', 'estrela', 'Marcas', 'catalogo', null],
     ]],
     ['Marketing e entregas', [

@@ -10,6 +10,7 @@ use Core\Flash;
 use Core\HtmlSeguro;
 use Core\Upload;
 use Core\Validador;
+use App\Models\Categoria;
 use RuntimeException;
 
 class ProdutosController extends Base
@@ -24,7 +25,11 @@ class ProdutosController extends Base
             $like = '%' . addcslashes($q, '%_') . '%';
             array_push($p, $like, $like);
         }
-        if ($c = (int) ($_GET['categoria'] ?? 0)) { $w[] = 'p.categoria_id = ?'; $p[] = $c; }
+        if ($c = (int) ($_GET['categoria'] ?? 0)) { // inclui as subcategorias
+            $ids = (new Categoria())->descendentes($c);
+            $w[] = 'p.categoria_id IN (' . implode(',', array_fill(0, count($ids), '?')) . ')';
+            array_push($p, ...$ids);
+        }
         if ($m = (int) ($_GET['marca'] ?? 0))     { $w[] = 'p.marca_id = ?';     $p[] = $m; }
         $estado = $_GET['estado'] ?? 'activo';
         if (in_array($estado, ['activo', 'rascunho', 'inactivo'], true)) { $w[] = 'p.estado = ?'; $p[] = $estado; }
@@ -53,7 +58,7 @@ class ProdutosController extends Base
         $this->pagina('produtos/lista', [
             'produtos'   => $produtos,
             'pg'         => $pg,
-            'categorias' => $this->db()->query("SELECT id, nome FROM categorias ORDER BY nome")->fetchAll(),
+            'categorias' => $this->categoriasIndentadas(),
             'marcas'     => $this->db()->query("SELECT id, nome FROM marcas ORDER BY nome")->fetchAll(),
             'estado'     => $estado,
         ], 'Produtos');
@@ -91,7 +96,7 @@ class ProdutosController extends Base
             'produto'    => $produto,
             'specs'      => $specs,
             'imagens'    => $imagens,
-            'categorias' => $this->db()->query("SELECT id, nome, slug FROM categorias ORDER BY nome")->fetchAll(),
+            'categorias' => $this->categoriasIndentadas(),
             'marcas'     => $this->db()->query("SELECT id, nome FROM marcas ORDER BY nome")->fetchAll(),
         ], $produto ? 'Editar ' . $produto['nome'] : 'Novo produto');
     }
@@ -258,5 +263,15 @@ class ProdutosController extends Base
         $this->db()->prepare("UPDATE produtos SET stock = ? WHERE id = ?")->execute([(int) $stock, (int) $id]);
         AdminAuth::registar('stock', 'produto', $id, $antes['stock'] . ' → ' . $stock);
         $this->json(['ok' => true, 'mensagem' => 'Stock actualizado.', 'baixo' => (int) $stock <= (int) $antes['stock_minimo']]);
+    }
+
+    /** Categorias na ordem da árvore, com o nome indentado ("— Subcategoria"), para os <select>. */
+    private function categoriasIndentadas(): array
+    {
+        $linhas = [];
+        foreach (Categoria::opcoesIndentadas((new Categoria())->arvoreAdmin()) as $id => $nome) {
+            $linhas[] = ['id' => $id, 'nome' => $nome];
+        }
+        return $linhas;
     }
 }

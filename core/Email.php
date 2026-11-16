@@ -1,9 +1,11 @@
 <?php
 // =====================================================================
 // core/Email.php — Envio de emails transaccionais.
-// Em 'dev' grava em storage/logs/emails.log em vez de enviar.
-// Em produção usa mail() do servidor (cPanel). Para SMTP autenticado,
-// substituir apenas o método enviar().
+// Drivers (EMAIL_DRIVER):
+//   'smtp' — SMTP autenticado (Gmail: smtp.gmail.com + senha de app). Recomendado em produção.
+//   'mail' — mail() do servidor (só onde há sendmail, ex.: cPanel).
+//   'log'  — grava em storage/logs/emails.log (desenvolvimento).
+// Uma falha de envio nunca interrompe o pedido: fica em storage/logs/emails-erros.log.
 // =====================================================================
 
 namespace Core;
@@ -24,26 +26,76 @@ class Email
             return true;
         }
 
-        $linhas = [
-            'MIME-Version: 1.0',
-            'Content-Type: text/html; charset=UTF-8',
-            'From: ' . NOME_SITE . ' <' . EMAIL_LOJA . '>',
+        $corpo = ($opcoes['modelo'] ?? true) ? self::modelo($assunto, $html, $opcoes['pre'] ?? null, $opcoes['cancelar'] ?? null) : $html;
+        $cabecalhos = [
+            'From: ' . self::cabecalho(NOME_SITE) . ' <' . EMAIL_REMETENTE . '>',
             'Reply-To: ' . EMAIL_LOJA,
         ];
         if (!empty($opcoes['cancelar'])) {
-            $linhas[] = 'List-Unsubscribe: <' . $opcoes['cancelar'] . '>';
-            $linhas[] = 'List-Unsubscribe-Post: List-Unsubscribe=One-Click';
+            $cabecalhos[] = 'List-Unsubscribe: <' . $opcoes['cancelar'] . '>';
+            $cabecalhos[] = 'List-Unsubscribe-Post: List-Unsubscribe=One-Click';
         }
-        $corpo = ($opcoes['modelo'] ?? true) ? self::modelo($assunto, $html, $opcoes['pre'] ?? null, $opcoes['cancelar'] ?? null) : $html;
-        return mail($para, '=?UTF-8?B?' . base64_encode($assunto) . '?=', $corpo, implode("\r\n", $linhas));
+
+        try {
+            if (EMAIL_DRIVER === 'smtp') {
+                [$mime, $tipo] = self::mime($corpo);
+                $mensagem = implode("\r\n", array_merge([
+                    'Date: ' . date('r'),
+                    'Message-ID: <' . bin2hex(random_bytes(12)) . '@' . (explode('@', EMAIL_REMETENTE)[1] ?? 'localhost') . '>',
+                    'To: ' . $para,
+                    'Subject: ' . self::cabecalho($assunto),
+                    'MIME-Version: 1.0',
+                    'Content-Type: ' . $tipo,
+                ], $cabecalhos)) . "\r\n\r\n" . $mime;
+                (new Smtp(SMTP_HOST, SMTP_PORTA, SMTP_UTILIZADOR, SMTP_SENHA, SMTP_SEGURANCA))
+                    ->enviar(EMAIL_REMETENTE, $para, $mensagem);
+                return true;
+            }
+
+            $ok = mail($para, self::cabecalho($assunto), $corpo, implode("\r\n", array_merge(
+                ['MIME-Version: 1.0', 'Content-Type: text/html; charset=UTF-8'], $cabecalhos)));
+            if (!$ok) {
+                throw new \RuntimeException('mail() devolveu false (o servidor tem sendmail?).');
+            }
+            return true;
+        } catch (\Throwable $e) {
+            self::registarFalha($para, $assunto, $e->getMessage());
+            return false;
+        }
     }
 
-    /** Invólucro HTML simples, compatível com clientes de email. */
+    /** Corpo multipart/alternative (texto + HTML): entrega melhor e lê-se em clientes simples. */
+    private static function mime(string $html): array
+    {
+        $fronteira = '=_dtk_' . bin2hex(random_bytes(8));
+        $mime = "--$fronteira\r\nContent-Type: text/plain; charset=UTF-8\r\nContent-Transfer-Encoding: base64\r\n\r\n"
+            . chunk_split(base64_encode(self::textoSimples($html)))
+            . "--$fronteira\r\nContent-Type: text/html; charset=UTF-8\r\nContent-Transfer-Encoding: base64\r\n\r\n"
+            . chunk_split(base64_encode($html))
+            . "--$fronteira--\r\n";
+        return [$mime, 'multipart/alternative; boundary="' . $fronteira . '"'];
+    }
+
+    /** Codifica em UTF-8 (RFC 2047) só quando há acentos. */
+    private static function cabecalho(string $texto): string
+    {
+        $texto = str_replace(["\r", "\n"], ' ', $texto); // nunca deixar quebrar cabeçalhos
+        return preg_match('/[^\x20-\x7E]/', $texto) ? '=?UTF-8?B?' . base64_encode($texto) . '?=' : $texto;
+    }
+
+    private static function registarFalha(string $para, string $assunto, string $erro): void
+    {
+        $linha = sprintf("[%s] %s | Para: %s | Assunto: %s | %s\n", date('c'), EMAIL_DRIVER, $para, $assunto, $erro);
+        @file_put_contents(RAIZ . '/storage/logs/emails-erros.log', $linha, FILE_APPEND);
+        error_log('[email] ' . trim($linha));
+    }
+
     /** Versão em texto para o registo de desenvolvimento, com os links visíveis: "texto [URL]". */
     private static function textoSimples(string $html): string
     {
+        $html = preg_replace(['#<head\b.*?</head>#is', '#<div style="display:none[^>]*>.*?</div>#is'], '', $html);
         $html = preg_replace('#<a\s[^>]*href="([^"]+)"[^>]*>(.*?)</a>#is', '$2 [$1]', $html);
-        $html = str_replace(['<br>', '</p>', '</tr>', '</h1>'], "\n", $html);
+        $html = str_replace(['<br>', '</p>', '</tr>', '</h1>', '</h2>', '</li>'], "\n", $html);
         return trim(preg_replace("/\n{3,}/", "\n\n", strip_tags($html)));
     }
 

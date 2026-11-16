@@ -23,11 +23,12 @@ class ProdutoController extends Controller
         }
         $modelo->registarVisualizacao((int) $produto['id']);
 
-        $breadcrumb = [
-            ['Início', '/'],
-            [$produto['categoria_nome'], '/categoria/' . $produto['categoria_slug']],
-            [$produto['nome'], '/produto/' . $slug],
-        ];
+        // Início › Categoria › Subcategoria › … › Produto
+        $breadcrumb = (new \App\Models\Categoria())->breadcrumb((int) $produto['categoria_id'], false);
+        if (count($breadcrumb) === 1) { // categoria inactiva: mantém pelo menos o nome
+            $breadcrumb[] = [$produto['categoria_nome'], '/categoria/' . $produto['categoria_slug']];
+        }
+        $breadcrumb[] = [$produto['nome'], '/produto/' . $slug];
 
         $imagemAbsoluta = URL_ORIGEM . imagemProduto($produto);
         $jsonProduto = [

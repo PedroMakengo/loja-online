@@ -61,28 +61,42 @@
     </div>
 
     <!-- Navegação por categorias (desktop) -->
-    <nav class="hidden lg:block border-t border-linha" aria-label="Categorias">
+    <nav class="relative hidden lg:block border-t border-linha" aria-label="Categorias">
         <div class="container flex h-12 items-center gap-1 text-sm">
             <div class="relative" data-dropdown>
                 <button type="button" class="btn-fantasma h-9 px-3 font-semibold" data-dropdown-botao aria-expanded="false">
                     <?= icone('grelha', 'h-4 w-4') ?> Todas as categorias <?= icone('seta-baixo', 'h-4 w-4') ?>
                 </button>
-                <div class="absolute left-0 top-11 w-[560px] cartao shadow-flutuante p-3 grid grid-cols-2 gap-1 animate-entrar" data-dropdown-painel hidden>
+                <div class="absolute left-0 top-11 z-40 w-[640px] max-h-[70vh] overflow-y-auto cartao shadow-flutuante p-3 grid grid-cols-2 gap-1 animate-entrar" data-dropdown-painel hidden>
                     <?php foreach ($menuCategorias as $c): ?>
-                    <a href="<?= url('/categoria/' . $c['slug']) ?>" class="flex items-center gap-3 rounded-xl p-2 hover:bg-elevado">
-                        <img src="<?= imagemCategoria($c['slug']) ?>" alt="" class="h-10 w-10 rounded-lg bg-white p-1" loading="lazy" width="40" height="40">
-                        <span>
-                            <span class="block font-semibold text-tinta"><?= e($c['nome']) ?></span>
+                    <div class="flex gap-3 rounded-xl p-2 hover:bg-elevado">
+                        <img src="<?= imagemCategoria($c['slug']) ?>" alt="" class="h-10 w-10 shrink-0 rounded-lg bg-white p-1" loading="lazy" width="40" height="40">
+                        <span class="min-w-0">
+                            <a href="<?= url('/categoria/' . $c['slug']) ?>" class="block font-semibold text-tinta hover:text-marca"><?= e($c['nome']) ?></a>
+                            <?php if ($c['filhos']): ?>
+                            <span class="mt-0.5 block text-xs leading-relaxed text-suave">
+                                <?php foreach (array_slice($c['filhos'], 0, 4) as $j => $f): ?><?= $j ? ' · ' : '' ?><a href="<?= url('/categoria/' . $f['slug']) ?>" class="hover:text-tinta hover:underline"><?= e($f['nome']) ?></a><?php endforeach; ?><?= count($c['filhos']) > 4 ? ' …' : '' ?>
+                            </span>
+                            <?php else: ?>
                             <span class="block text-xs text-suave num"><?= (int) $c['total_produtos'] ?> produtos</span>
+                            <?php endif; ?>
                         </span>
-                    </a>
+                    </div>
                     <?php endforeach; ?>
                 </div>
             </div>
             <span class="mx-1 h-5 w-px bg-linha" aria-hidden="true"></span>
             <?php foreach (array_slice($menuCategorias, 0, 7) as $c): ?>
-            <a href="<?= url('/categoria/' . $c['slug']) ?>"
-               class="h-9 inline-flex items-center rounded-lg px-3 hover:bg-elevado <?= rotaActiva('/categoria/' . $c['slug']) ? 'font-semibold text-marca' : 'text-tinta' ?>"><?= e($c['nome']) ?></a>
+            <?php // Com subcategorias: mega-menu ao passar o rato ou ao focar com o teclado (sem JS) ?>
+            <div class="self-stretch flex items-center <?= $c['filhos'] ? 'group/mega' : '' ?>"><?php // altura toda da barra: o rato passa do link ao painel sem o fechar ?>
+                <a href="<?= url('/categoria/' . $c['slug']) ?>" <?= $c['filhos'] ? 'aria-haspopup="true"' : '' ?>
+                   class="h-9 inline-flex items-center gap-1 rounded-lg px-3 hover:bg-elevado group-hover/mega:bg-elevado <?= rotaActiva('/categoria/' . $c['slug']) ? 'font-semibold text-marca' : 'text-tinta' ?>"><?= e($c['nome']) ?><?= $c['filhos'] ? icone('seta-baixo', 'h-3.5 w-3.5 text-suave') : '' ?></a>
+                <?php if ($c['filhos']): ?>
+                <div class="invisible opacity-0 group-hover/mega:visible group-hover/mega:opacity-100 group-focus-within/mega:visible group-focus-within/mega:opacity-100 transition-opacity duration-150 delay-100 absolute inset-x-0 top-full z-40 border-y border-linha bg-superficie shadow-flutuante max-h-[75vh] overflow-y-auto">
+                    <?php $raiz = $c; require __DIR__ . '/mega-menu.php'; ?>
+                </div>
+                <?php endif; ?>
+            </div>
             <?php endforeach; ?>
             <div class="ml-auto flex items-center gap-1">
                 <a href="<?= url('/promocoes') ?>" class="h-9 inline-flex items-center rounded-lg px-3 font-semibold text-coral hover:bg-coral-suave">Promoções</a>
@@ -109,11 +123,37 @@
             </div>
             <p class="px-2 pb-2 text-sm font-semibold text-suave">Categorias</p>
             <?php foreach ($menuCategorias as $c): ?>
+            <?php if (!$c['filhos']): ?>
             <a href="<?= url('/categoria/' . $c['slug']) ?>" class="flex items-center gap-3 rounded-xl px-2 py-2 hover:bg-elevado">
                 <img src="<?= imagemCategoria($c['slug']) ?>" alt="" class="h-9 w-9 rounded-lg bg-white p-1" loading="lazy" width="36" height="36">
                 <span class="flex-1 font-medium"><?= e($c['nome']) ?></span>
                 <?= icone('seta-dir', 'h-4 w-4 text-suave') ?>
             </a>
+            <?php else: ?>
+            <!-- Categoria com subcategorias: abre/fecha (acordeão nativo) -->
+            <details class="group/cat rounded-xl open:bg-elevado/60">
+                <summary class="flex cursor-pointer list-none items-center gap-3 rounded-xl px-2 py-2 hover:bg-elevado [&::-webkit-details-marker]:hidden">
+                    <img src="<?= imagemCategoria($c['slug']) ?>" alt="" class="h-9 w-9 rounded-lg bg-white p-1" loading="lazy" width="36" height="36">
+                    <span class="flex-1 font-medium"><?= e($c['nome']) ?></span>
+                    <?= icone('seta-baixo', 'h-4 w-4 text-suave transition-transform group-open/cat:rotate-180') ?>
+                </summary>
+                <ul class="pb-2 pl-14 pr-2 text-sm">
+                    <li><a href="<?= url('/categoria/' . $c['slug']) ?>" class="block py-2 font-semibold text-marca">Ver tudo em <?= e($c['nome']) ?></a></li>
+                    <?php foreach ($c['filhos'] as $f): ?>
+                    <li>
+                        <a href="<?= url('/categoria/' . $f['slug']) ?>" class="block py-2 font-medium text-tinta"><?= e($f['nome']) ?></a>
+                        <?php if ($f['filhos']): ?>
+                        <ul class="mb-1 border-l border-linha pl-3">
+                            <?php foreach ($f['filhos'] as $n): ?>
+                            <li><a href="<?= url('/categoria/' . $n['slug']) ?>" class="block py-1.5 text-suave"><?= e($n['nome']) ?></a></li>
+                            <?php endforeach; ?>
+                        </ul>
+                        <?php endif; ?>
+                    </li>
+                    <?php endforeach; ?>
+                </ul>
+            </details>
+            <?php endif; ?>
             <?php endforeach; ?>
             <div class="mt-4 border-t border-linha pt-4 space-y-1 text-sm">
                 <a href="<?= url('/marcas') ?>" class="block rounded-lg px-2 py-2 hover:bg-elevado">Marcas</a>

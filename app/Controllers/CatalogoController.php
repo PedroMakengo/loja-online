@@ -22,20 +22,24 @@ class CatalogoController extends Controller
 
     public function categoria(string $slug): void
     {
-        $categoria = (new Categoria())->porSlug($slug);
+        $modelo = new Categoria();
+        $categoria = $modelo->porSlug($slug);
         if (!$categoria) {
             (new ErroController())->naoEncontrado();
             return;
         }
+        // Inclui os produtos das subcategorias (ex.: Informática mostra Desktops, Portáteis…)
         $this->listagem(
-            ['categoria_id' => $categoria['id']],
+            ['categoria_ids' => $modelo->idsDoRamo((int) $categoria['id'])],
             $categoria['nome'],
             $categoria['descricao'],
-            [['Início', '/'], ['Produtos', '/produtos'], [$categoria['nome'], '/categoria/' . $slug]],
+            $modelo->breadcrumb((int) $categoria['id']),
             [
                 'titulo'    => $categoria['meta_titulo'] ?: $categoria['nome'] . ' em Angola — preços em Kz',
-                'descricao' => $categoria['meta_descricao'] ?: $categoria['descricao'] . '. Entrega em todo o país e pagamento com Multicaixa Express.',
-            ]
+                'descricao' => $categoria['meta_descricao'] ?: ($categoria['descricao'] ? rtrim($categoria['descricao'], '.') . '. ' : '') . 'Entrega em todo o país e pagamento com Multicaixa Express.',
+            ],
+            true,
+            $categoria
         );
     }
 
@@ -92,14 +96,14 @@ class CatalogoController extends Controller
     public function categorias(): void
     {
         $this->view('paginas/categorias', [
-            'categorias' => (new Categoria())->todasActivas(),
+            'categorias' => (new Categoria())->arvore(),
             'seo' => ['titulo' => 'Categorias', 'descricao' => 'Todas as categorias de produtos da DIOTEKNO: smartphones, computadores, TVs, gaming, electrodomésticos e mais.'],
         ]);
     }
 
     // ---------------------------------------------------------------------
 
-    private function listagem(array $base, string $titulo, ?string $descricao, array $breadcrumb, array $seo = [], bool $mostrarMarcas = true): void
+    private function listagem(array $base, string $titulo, ?string $descricao, array $breadcrumb, array $seo = [], bool $mostrarMarcas = true, ?array $categoria = null): void
     {
         $filtros = array_merge($this->filtrosDoPedido(), $base);
         $produto = new Produto();
@@ -133,8 +137,24 @@ class CatalogoController extends Controller
             'facetaMarcas'  => $mostrarMarcas ? $produto->facetaMarcas($filtros) : [],
             'facetaPreco'   => $produto->facetaPreco($filtros),
             'mostrarMarcas' => $mostrarMarcas,
+            // Navegação na árvore: subcategorias da actual, ou irmãs quando é a última do ramo
+            'subcategorias' => $categoria ? $this->navegacaoCategoria($categoria) : [],
+            'categoriaActual' => $categoria,
             'seo'           => $seo,
         ]);
+    }
+
+    /** Filhas da categoria; se não tiver, as irmãs (para saltar entre subcategorias do mesmo pai). */
+    private function navegacaoCategoria(array $categoria): array
+    {
+        if ($categoria['filhos']) {
+            return $categoria['filhos'];
+        }
+        if ($categoria['parent_id']) {
+            $pai = (new Categoria())->caminho((int) $categoria['parent_id']);
+            return $pai ? end($pai)['filhos'] : [];
+        }
+        return [];
     }
 
     /** Lê e higieniza os filtros da query string. */

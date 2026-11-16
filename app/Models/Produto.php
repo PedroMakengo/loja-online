@@ -32,7 +32,7 @@ class Produto extends Model
 
     /**
      * Listagem com filtros. Devolve ['itens' => [...], 'total' => n].
-     * $f: categoria_id, marca_id, marcas[] (slugs), min, max, promo, novidade, stock, q, ordem, pagina
+     * $f: categoria_id | categoria_ids[] (ramo da árvore), marca_id, marcas[] (slugs), min, max, promo, novidade, stock, q, ordem, pagina
      */
     public function listar(array $f, int $porPagina = PRODUTOS_POR_PAGINA): array
     {
@@ -98,7 +98,13 @@ class Produto extends Model
         $w = ["p.estado = 'activo'", 'c.activo = 1'];
         $p = [];
 
-        if (!empty($f['categoria_id'])) { $w[] = 'p.categoria_id = ?'; $p[] = (int) $f['categoria_id']; }
+        if (!empty($f['categoria_ids']) && is_array($f['categoria_ids'])) {
+            // Categoria com subcategorias: produtos de todo o ramo
+            $w[] = 'p.categoria_id IN (' . implode(',', array_fill(0, count($f['categoria_ids']), '?')) . ')';
+            array_push($p, ...array_map('intval', $f['categoria_ids']));
+        } elseif (!empty($f['categoria_id'])) {
+            $w[] = 'p.categoria_id = ?'; $p[] = (int) $f['categoria_id'];
+        }
         if (!empty($f['marca_id']))     { $w[] = 'p.marca_id = ?';     $p[] = (int) $f['marca_id']; }
 
         if (!empty($f['marcas']) && is_array($f['marcas'])) {

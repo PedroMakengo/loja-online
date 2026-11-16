@@ -18,8 +18,15 @@ services:
       - SERVICE_FQDN_APP_80
       - AMBIENTE=${AMBIENTE:-prod}
       - PAGAMENTOS_SIMULADOS=${PAGAMENTOS_SIMULADOS:-1}
-      - EMAIL_DRIVER=${EMAIL_DRIVER:-log}
+      - URL_SITE=${URL_SITE:-}
+      - EMAIL_DRIVER=${EMAIL_DRIVER:-}
       - EMAIL_LOJA=${EMAIL_LOJA:-geral@diotekno.ao}
+      - EMAIL_REMETENTE=${EMAIL_REMETENTE:-}
+      - EMAIL_NOTIFICACOES=${EMAIL_NOTIFICACOES:-}
+      - SMTP_HOST=${SMTP_HOST:-}
+      - SMTP_PORTA=${SMTP_PORTA:-587}
+      - SMTP_UTILIZADOR=${SMTP_UTILIZADOR:-}
+      - SMTP_SENHA=${SMTP_SENHA:-}
       - DB_HOST=mysql
       - DB_PORT=3306
       - DB_NOME=${DB_NOME:-diotekno_loja}

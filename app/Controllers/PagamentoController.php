@@ -62,8 +62,19 @@ class PagamentoController extends Controller
             $ok = Pagamentos::confirmar((int) $pg['id'], 'Pagamento confirmado pelo operador.', isset($d['valor']) ? (float) $d['valor'] : null);
             $registar($ok ? 'confirmado' : 'ignorado (já confirmado, valor inferior ou pedido não pendente)');
         } elseif (in_array($estado, ['recusado', 'falhado', 'failed', 'rejected', 'cancelado'], true)) {
-            $db->prepare("UPDATE pagamentos SET estado = 'falhado' WHERE id = ? AND estado = 'pendente'")->execute([$pg['id']]);
+            $upd = $db->prepare("UPDATE pagamentos SET estado = 'falhado' WHERE id = ? AND estado = 'pendente'");
+            $upd->execute([$pg['id']]);
             $registar('falhado');
+            if ($upd->rowCount() > 0) {
+                $p = $db->prepare("SELECT p.numero, p.cliente_id, pg.metodo FROM pagamentos pg JOIN pedidos p ON p.id = pg.pedido_id WHERE pg.id = ?");
+                $p->execute([$pg['id']]);
+                if ($p = $p->fetch()) {
+                    \App\Servicos\Notificacoes::cliente((int) $p['cliente_id'], 'Pagamento não concluído — pedido ' . $p['numero'],
+                        '<p>O pagamento por ' . e(Pagamentos::nome($p['metodo'])) . ' do pedido <strong>' . e($p['numero']) . '</strong> não foi concluído.</p>'
+                        . '<p>Os produtos continuam reservados por pouco tempo. Pode tentar de novo ou escolher outra forma de pagamento:</p>'
+                        . '<p><a href="' . URL_BASE . '/conta/pedidos/' . e($p['numero']) . '#pagamento">Pagar agora</a></p>');
+                }
+            }
         } else {
             $registar('estado ignorado: ' . $estado);
         }
