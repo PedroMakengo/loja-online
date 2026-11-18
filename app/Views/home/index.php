@@ -98,7 +98,7 @@ $temas = [
         <?php foreach ($categoriasDestaque as $c): ?>
         <a href="<?= url('/categoria/' . $c['slug']) ?>" class="group w-36 sm:w-44 lg:w-auto cartao p-3 hover:border-tinta/25 transition-colors">
             <div class="aspect-[4/3] rounded-xl bg-white flex items-center justify-center overflow-hidden">
-                <img src="<?= imagemCategoria($c['slug']) ?>" alt="" class="h-[85%] w-[85%] object-contain transition-transform duration-300 group-hover:scale-105" loading="lazy" width="200" height="150">
+                <img src="<?= imagemCategoria($c['imagem'] ?? $c['slug']) ?>" alt="" class="h-[85%] w-[85%] object-contain transition-transform duration-300 group-hover:scale-105" loading="lazy" width="200" height="150">
             </div>
             <p class="mt-3 font-display text-base font-bold"><?= e($c['nome']) ?></p>
             <p class="text-xs text-suave num"><?= (int) $c['total_produtos'] ?> produtos</p>

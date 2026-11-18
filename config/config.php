@@ -120,7 +120,7 @@ define('GOOGLE_CLIENT_SECRET', env('GOOGLE_CLIENT_SECRET', ''));
 define('GOOGLE_REDIRECT_URI', env('GOOGLE_REDIRECT_URI', '')); // opcional: fixa o URI se o proxy mudar o host
 
 // Versão dos assets — mudar após recompilar CSS/JS para limpar cache.
-define('VERSAO_ASSETS', '1.9.2');
+define('VERSAO_ASSETS', '1.10.0');
 
 // ---------------------------------------------------------------------
 // Sessão segura

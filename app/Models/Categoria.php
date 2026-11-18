@@ -36,6 +36,30 @@ class Categoria extends Model
         return array_values(array_filter($porId, fn ($c) => $c['parent_id'] === null));
     }
 
+    /**
+     * Árvore para a navegação da loja (menus, /categorias, botões de subcategorias):
+     * igual a arvore() mas sem os ramos sem produtos, para o cliente não cair em páginas vazias.
+     * A página /categoria/<slug> de uma categoria vazia continua a abrir (porSlug usa a árvore completa).
+     */
+    public function arvoreMenu(): array
+    {
+        return self::podarVazias($this->arvore());
+    }
+
+    public static function podarVazias(array $nos): array
+    {
+        $r = [];
+        foreach ($nos as $n) {
+            if ((int) $n['total_produtos'] === 0) {
+                continue;
+            }
+            $n['filhos'] = self::podarVazias($n['filhos']);
+            $n['tem_filhos'] = (bool) $n['filhos'];
+            $r[] = $n;
+        }
+        return $r;
+    }
+
     /** Todas as categorias visíveis em lista plana, na ordem da árvore (pai antes dos filhos). */
     public function todasActivas(): array
     {
@@ -226,6 +250,10 @@ class Categoria extends Model
                 $c['produtos_directos'] = (int) $c['produtos_directos'];
                 $c['total_produtos'] = $c['produtos_directos'] + array_sum(array_column($c['filhos'], 'total_produtos'));
                 $c['tem_filhos'] = (bool) $c['filhos'];
+                // Imagem: assets/img/categorias/<slug>.webp; sem ficheiro, a da primeira filha que tenha
+                $c['imagem'] = is_file(RAIZ . '/assets/img/categorias/' . $c['slug'] . '.webp')
+                    ? $c['slug']
+                    : (array_values(array_filter(array_column($c['filhos'], 'imagem'), fn ($s) => $s !== 'acessorios'))[0] ?? 'acessorios');
                 $nos[] = $c;
             }
             return $nos;

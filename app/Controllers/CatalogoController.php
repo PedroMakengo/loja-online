@@ -96,7 +96,7 @@ class CatalogoController extends Controller
     public function categorias(): void
     {
         $this->view('paginas/categorias', [
-            'categorias' => (new Categoria())->arvore(),
+            'categorias' => (new Categoria())->arvoreMenu(),
             'seo' => ['titulo' => 'Categorias', 'descricao' => 'Todas as categorias de produtos da DIOTEKNO: smartphones, computadores, TVs, gaming, electrodomésticos e mais.'],
         ]);
     }
@@ -147,12 +147,17 @@ class CatalogoController extends Controller
     /** Filhas da categoria; se não tiver, as irmãs (para saltar entre subcategorias do mesmo pai). */
     private function navegacaoCategoria(array $categoria): array
     {
-        if ($categoria['filhos']) {
-            return $categoria['filhos'];
+        // Sem ramos vazios, mas a categoria actual aparece sempre (para ficar marcada)
+        $semVazias = fn (array $nos) => array_values(array_filter($nos,
+            fn ($n) => (int) $n['total_produtos'] > 0 || (int) $n['id'] === (int) $categoria['id']));
+
+        if ($filhas = $semVazias($categoria['filhos'])) {
+            return $filhas;
         }
         if ($categoria['parent_id']) {
             $pai = (new Categoria())->caminho((int) $categoria['parent_id']);
-            return $pai ? end($pai)['filhos'] : [];
+            $irmas = $pai ? $semVazias(end($pai)['filhos']) : [];
+            return count($irmas) > 1 ? $irmas : [];
         }
         return [];
     }

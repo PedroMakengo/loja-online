@@ -96,6 +96,7 @@
     if (!g) return;
     g.classList.add('hidden');
     delete g.dataset.aberta;
+    fecharSubmenus(g); // o menu mobile volta a abrir no 1.º nível
     if (!$('[data-gaveta][data-aberta]')) document.body.style.overflow = '';
     ultimoFoco?.focus?.();
   }
@@ -117,11 +118,11 @@
     if (e.key !== 'Escape') return;
     const aberta = $$('[data-gaveta][data-aberta]').pop();
     if (aberta) fecharGaveta(aberta);
-    fecharDropdowns();
   });
 
   // ------------------------------------------------------------------
-  // Dropdown "Todas as categorias"
+  // Dropdowns: "Todas as categorias" e o painel de subcategorias de cada
+  // categoria da barra (abrem ao clicar, como na NCR)
   // ------------------------------------------------------------------
   function fecharDropdowns(excepto = null) {
     $$('[data-dropdown]').forEach((d) => {
@@ -141,6 +142,60 @@
       return;
     }
     if (!dd) fecharDropdowns();
+  });
+  // Escape fecha o dropdown e devolve o foco ao botão
+  document.addEventListener('keydown', (e) => {
+    if (e.key !== 'Escape') return;
+    const aberto = $$('[data-dropdown]').find((d) => !$('[data-dropdown-painel]', d).hidden);
+    if (aberto) { fecharDropdowns(); $('[data-dropdown-botao]', aberto).focus(); }
+  });
+
+  // Dentro de "Todas as categorias" (como na NCR): clicar numa categoria mostra as subcategorias dela
+  function mostrarSubcategorias(botao) {
+    const painel = botao.closest('[data-dropdown-painel]');
+    $$('[data-cat-raiz]', painel).forEach((b) => b.setAttribute('aria-current', String(b === botao)));
+    $$('[data-cat-painel]', painel).forEach((p) => { p.hidden = p.dataset.catPainel !== botao.dataset.catRaiz; });
+  }
+  document.addEventListener('click', (e) => {
+    const botao = e.target.closest('[data-cat-raiz]');
+    if (botao) mostrarSubcategorias(botao);
+  });
+  // Setas ↑/↓ percorrem a lista de categorias e mostram logo as subcategorias
+  document.addEventListener('keydown', (e) => {
+    const botao = e.target.closest?.('[data-cat-raiz]');
+    if (!botao || (e.key !== 'ArrowDown' && e.key !== 'ArrowUp')) return;
+    e.preventDefault();
+    const todos = $$('[data-cat-raiz]', botao.closest('[data-cat-lista]'));
+    const prox = todos[(todos.indexOf(botao) + (e.key === 'ArrowDown' ? 1 : -1) + todos.length) % todos.length];
+    prox.focus();
+    mostrarSubcategorias(prox);
+  });
+
+  // ------------------------------------------------------------------
+  // Menu mobile por níveis (como na NCR): categoria → subcategorias → sub-subcategorias
+  // ------------------------------------------------------------------
+  function fecharSubmenus(raiz) {
+    $$('[data-sub]', raiz).forEach((s) => { s.hidden = true; });
+    $$('[data-sub-abrir]', raiz).forEach((b) => b.setAttribute('aria-expanded', 'false'));
+  }
+  document.addEventListener('click', (e) => {
+    const abrir = e.target.closest('[data-sub-abrir]');
+    if (abrir) {
+      const ecra = document.getElementById(abrir.dataset.subAbrir);
+      if (!ecra) return;
+      ecra.hidden = false;
+      ecra.scrollTop = 0;
+      abrir.setAttribute('aria-expanded', 'true');
+      $('[data-sub-voltar]', ecra)?.focus();
+      return;
+    }
+    const voltar = e.target.closest('[data-sub-voltar]');
+    if (!voltar) return;
+    const ecra = voltar.closest('[data-sub]');
+    ecra.hidden = true;
+    const origem = $(`[data-sub-abrir="${ecra.dataset.sub}"]`, ecra.closest('[data-submenus]'));
+    origem?.setAttribute('aria-expanded', 'false');
+    origem?.focus();
   });
 
   // ------------------------------------------------------------------

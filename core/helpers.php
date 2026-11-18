@@ -18,7 +18,11 @@ function url(string $caminho = '/'): string
 /** URL de um asset com versão para controlo de cache. */
 function asset(string $caminho): string
 {
-    return BASE_PATH . '/assets/' . ltrim($caminho, '/') . '?v=' . VERSAO_ASSETS;
+    // Os assets ficam 1 ano em cache (.htaccess): a data do ficheiro na versão faz o browser
+    // buscar logo o CSS/JS novo depois de cada alteração, sem depender de mudar VERSAO_ASSETS à mão.
+    $caminho = ltrim($caminho, '/');
+    $data = @filemtime(RAIZ . '/assets/' . $caminho);
+    return BASE_PATH . '/assets/' . $caminho . '?v=' . VERSAO_ASSETS . ($data ? '.' . $data : '');
 }
 
 /** Preço em Kwanzas: 389900 -> "389 900 Kz" */

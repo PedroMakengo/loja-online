@@ -30,6 +30,7 @@ $cores = [1 => 'bg-marca-suave text-marca', 2 => 'bg-elevado text-tinta', 3 => '
                     <?php if ($n > 1 && $q === ''): ?><span class="text-linha select-none" aria-hidden="true">└</span><?php endif; ?>
                     <a href="<?= url('/admin/categorias/' . $c['id']) ?>" class="hover:text-marca <?= $n === 1 ? 'font-bold' : 'font-medium' ?>"><?= e($c['nome']) ?></a>
                     <span class="text-xs text-suave hidden lg:inline">/<?= e($c['slug']) ?></span>
+                    <?php if ((int) $c['total_produtos'] === 0 && (int) $c['activo']): ?><span class="rounded-full bg-elevado px-2 py-0.5 text-[11px] font-semibold text-suave" title="Sem produtos: não aparece nos menus da loja até ter pelo menos um">Vazia · fora do menu</span><?php endif; ?>
                     <?php if ((int) $c['destaque']): ?><span class="rounded-full bg-aviso/15 px-2 py-0.5 text-[11px] font-semibold text-aviso" title="Aparece na página inicial">Início</span><?php endif; ?>
                 </div>
             </td>
@@ -55,4 +56,4 @@ $cores = [1 => 'bg-marca-suave text-marca', 2 => 'bg-elevado text-tinta', 3 => '
         <?php if (!$categorias): ?><tr><td colspan="6" class="px-4 py-10 text-center text-suave"><?= $q !== '' ? 'Nenhuma categoria com esse nome.' : 'Ainda não há categorias.' ?></td></tr><?php endif; ?>
     </tbody>
 </table></div></div>
-<p class="mt-3 text-xs text-suave">Produtos: na própria categoria / incluindo subcategorias. Só pode apagar categorias sem subcategorias e sem produtos; uma categoria inactiva esconde também todas as suas subcategorias da loja.</p>
+<p class="mt-3 text-xs text-suave">Produtos: na própria categoria / incluindo subcategorias. Só pode apagar categorias sem subcategorias e sem produtos; uma categoria inactiva esconde também todas as suas subcategorias da loja. Categorias sem produtos (nem nas subcategorias) não aparecem nos menus até terem pelo menos um.</p>

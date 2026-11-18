@@ -5,7 +5,7 @@
         <?php foreach ($categorias as $c): ?>
         <div class="group cartao p-3 hover:border-tinta/25 transition-colors flex flex-col" data-card="<?= url('/categoria/' . $c['slug']) ?>">
             <a href="<?= url('/categoria/' . $c['slug']) ?>" tabindex="-1" aria-hidden="true" class="aspect-[4/3] rounded-xl bg-white flex items-center justify-center">
-                <img src="<?= imagemCategoria($c['slug']) ?>" alt="" class="h-[80%] w-[80%] object-contain transition-transform duration-300 group-hover:scale-105" loading="lazy" width="200" height="150">
+                <img src="<?= imagemCategoria($c['imagem'] ?? $c['slug']) ?>" alt="" class="h-[80%] w-[80%] object-contain transition-transform duration-300 group-hover:scale-105" loading="lazy" width="200" height="150">
             </a>
             <a href="<?= url('/categoria/' . $c['slug']) ?>" class="mt-3 font-display text-lg font-bold hover:text-marca"><?= e($c['nome']) ?></a>
             <?php if ($c['filhos']): ?>
